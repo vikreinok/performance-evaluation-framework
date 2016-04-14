@@ -33,7 +33,7 @@ public class ProfilerMethodVisitor extends StartEndMethodVisitor {
 		//
 		// Stack: [ThreadLocal<Long>, long]
 		//
-		super.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(System.class), "currentTimeMillis", "()J",
+		super.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(System.class), "nanoTime", "()J",
 				false);
 
 		// Box the timestamp (long -> Long) by using Long.valueOf(...).
@@ -83,7 +83,7 @@ public class ProfilerMethodVisitor extends StartEndMethodVisitor {
 		//
 		// Stack: [LongHashMap<String>, String, long]
 		//
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(System.class), "currentTimeMillis", "()J", false);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(System.class), "nanoTime", "()J", false);
 
 		// Put the "start times" TLS on the stack, getting ready to fetch this
 		// thread's previous start-time

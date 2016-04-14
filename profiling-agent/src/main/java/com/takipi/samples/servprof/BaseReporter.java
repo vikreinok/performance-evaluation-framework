@@ -54,7 +54,7 @@ public abstract class BaseReporter {
 	}
 
 	protected String parseMetric(String metricName, long value) {
-		return String.format("Metric: %50s, total running time: %10d ms", metricName, value);
+		return String.format("Metric: %-160s, total running time: %10d ns", metricName, value);
 	}
 
 	protected void reportMetrics(Map<Object, Long> metrics) {

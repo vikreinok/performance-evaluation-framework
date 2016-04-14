@@ -31,30 +31,65 @@ public class Options {
 //				(||||com.mysql.jdbc.(\w)),m=( ),r=100,o=log_%s.txt
 //				-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 
+//        String extraClassPattern = "";
+//        extraClassPattern += "|";
+//        extraClassPattern += "org.springframework.data.jpa.repository.query.AbstractJpaQuery";
+//        extraClassPattern += "|";
+//        extraClassPattern += "org.springframework.data.jpa.repository.query.JpaQueryExecution";
+//        extraClassPattern += "|";
+//        extraClassPattern += "org.springframework.data.jpa.repository.query.PartTreeJpaQuery";
+//        extraClassPattern += "|";
+//        extraClassPattern += "org.springframework.jdbc.core.JdbcTemplate";
+//        extraClassPattern += "|";
+//        extraClassPattern += "ee.ttu.catering.rest.service.*";
+//        extraClassPattern += "|";
+//        extraClassPattern += "com.mysql.jdbc.PreparedStatement";
+//        extraClassPattern += "|";
+//        extraClassPattern += "org.hibernate.engine.jdbc.internal.StatementPreparerImpl";
+//        extraClassPattern += "|";
+//        extraClassPattern += "com.mysql.jdbc.ConnectionImpl";
+//        extraClassPattern += "|";
+//        extraClassPattern += "org.springframework.data.repository.Repository";
+//        extraClassPattern += "|";
+
         String extraClassPattern = "";
-        extraClassPattern += "|";
-        extraClassPattern += "org.springframework.data.jpa.repository.query.AbstractJpaQuery";
-        extraClassPattern += "|";
-        extraClassPattern += "org.springframework.data.jpa.repository.query.JpaQueryExecution";
-        extraClassPattern += "|";
-        extraClassPattern += "org.springframework.data.jpa.repository.query.PartTreeJpaQuery";
-        extraClassPattern += "|";
-        extraClassPattern += "org.springframework.jdbc.core.JdbcTemplate";
-        extraClassPattern += "|";
-        extraClassPattern += "ee.ttu.catering.rest.service.*";
-        extraClassPattern += "|";
-        extraClassPattern += "com.mysql.jdbc.PreparedStatement";
-        extraClassPattern += "|";
-        extraClassPattern += "org.hibernate.engine.jdbc.internal.StatementPreparerImpl";
-        extraClassPattern += "|";
-         extraClassPattern += "com.mysql.jdbc.ConnectionImpl";
-        extraClassPattern += "|";
-        extraClassPattern += "org.springframework.data.repository.Repository";
-        extraClassPattern += "|";
-        StringBuilder sb = new StringBuilder(classPattern);
+        extraClassPattern += "(";
+       /* extraClassPattern += "";
+        extraClassPattern += "";
+        extraClassPattern += "org.springframework.data.jpa.repository.query.*|";
+        extraClassPattern += "org.springframework.data.repository.*";
+        extraClassPattern += "org.springframework.jdbc.core.*|";
+        extraClassPattern += "((?!com.mcbfinance.aio.selfservice.facade.RegistrationRejectedException|" +
+                "com.mcbfinance.aio.config.selfservice.bankauth.fi.TupasConfig|" +
+                "com.mcbfinance.aio.service.calculators.APRCalculator|" +
+                "com.mcbfinance.aio.service.mmp.MMPServiceImpl|" +
+                "com.mcbfinance.aio.repository.SalesForceInfoRepositoryImpl|" +
+                "com.mcbfinance.aio.service.worapay.WoraPayServiceImpl|" +
+                "com.mcbfinance.aio.util.external.PersonGenerator|" +
+                "com.mcbfinance.aio.external.lv.creditreform.DummyCreditReformClient|" +
+                ")(com.mcbfinance.aio.*))|";
+//        extraClassPattern += "((?!com.mysql.jdbc.StringUtils|com/mysql/jdbc/Util|com.mysql.jdbc.exceptions.jdbc4.CommunicationsException|com.mysql.jdbc.exceptions.*)(com.mysql.jdbc.*))|";
+        extraClassPattern += "((?!org.hibernate.engine.jdbc.internal.LogicalConnectionImpl)(org.hibernate.engine.jdbc.internal.*))|";
+*/
+        extraClassPattern += "com.takipi.samples.servprof.main.*|";
+        extraClassPattern += "com.takipi.samples.servprof.main.*|";
+//        org.apache.tomcat.jdbc.pool.DataSource, org.apache.tomcat.dbcp.dbcp.PoolingDataSource, org.apache.commons.dbcp2.PoolingDataSource, org.apache.commons.dbcp.PoolingDataSource, com.mchange.v2.c3p0.AbstractPoolBackedDataSource, com.mchange.v2.c3p0.PoolBackedDataSource, com.mchange.v2.c3p0.ComboPooledDataSource, com.jolbox.bonecp.BoneCPDataSource, snaq.db.DBPoolDataSource, com.zaxxer.hikari.HikariDataSource, org.jboss.jca.adapters.jdbc.WrapperDataSource, org.springframework.jdbc.datasource.SingleConnectionDataSource, org.springframework.jdbc.datasource.DriverManagerDataSource, org.springframework.jdbc.datasource.SimpleDriverDataSource
+        extraClassPattern += "ee.ttu.catering.rest.service.*|";
+        extraClassPattern += "ee.ttu.catering.rest.*|";
+
+        extraClassPattern += "(?!";
+        extraClassPattern += "org.springframework.data.repository.config.*|";
+        extraClassPattern += ")";
+        extraClassPattern += ")";
+
+
+
+
+
+        StringBuilder sb = new StringBuilder(extraClassPattern);
         classPattern = sb.insert(classPattern.lastIndexOf(")"), extraClassPattern).toString();
 
-        classPattern.replace(")", extraClassPattern + ")");
+        extraClassPattern.replace(")", extraClassPattern + ")");
 
         String extraMethodPattern = "|";
         extraMethodPattern += "execute";
@@ -88,16 +123,15 @@ public class Options {
 
 
 
-        String extraMethodPattern2 = "|";
-        extraMethodPattern2 += "(?!clientPrepareStatement|prepareQueryStatement)\\w*";
-        extraMethodPattern2 += "|";
-
+        String extraMethodPattern2 = "";
+        extraMethodPattern2 += "(?!clientPrepareStatement|prepareQueryStatement|changeProduct)\\w*";
+        extraMethodPattern2 += "";
 
 
         sb = new StringBuilder(methodPattern);
         methodPattern = sb.insert(methodPattern.lastIndexOf(")"), extraMethodPattern2).toString();
 
-        return new Options(outputFileName, classPattern, methodPattern, reportIntervalMillis, vmProcessId);
+        return new Options(outputFileName, extraClassPattern, methodPattern, reportIntervalMillis, vmProcessId);
     }
 
     private static long readLong(Map<String, String> map, String key, long defaultValue) {
