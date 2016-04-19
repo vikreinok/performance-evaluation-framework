@@ -8,7 +8,10 @@ import java.util.Random;
 public class GeneratorUtil {
 
     public static final String generateMsisd() {
-        return "56" + (generateRandomNumber(899999) + 100000);
+//        return "+37256" + (generateRandomNumber(899999) + 100000);
+        String msisdn = "56" + (generateRandomNumber(899999) + 100000);
+        System.out.println("Generated msisdn " + msisdn);
+        return msisdn;
     }
 
 
@@ -27,6 +30,8 @@ public class GeneratorUtil {
 //                illegalSSN = true;
 //            }
         } while (illegalSSN);
+
+        System.out.println("Generated ssn " + randomSSN);
         return randomSSN;
     }
 

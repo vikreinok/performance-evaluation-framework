@@ -63,13 +63,13 @@ class CateringCoreFlow implements Runnable {
     public void run() {
         final GenericType<Collection<String>> genericType = new GenericType<Collection<String>>() {};
 
-        RequestBuilder authBuilder = new RequestBuilder();
+        RequestBuilder authBuilder = new RequestBuilder("catering-core/");
         authBuilder.addHeader("Authorization", "YWRtaW46YWRtaW4=");
 
-        ClientResponse clientResponse = authBuilder.post("rest/login", genericType, "{}");
+        ClientResponse clientResponse = authBuilder.resource("rest/login").post(ClientResponse.class);
         String token = clientResponse.getHeaders().get("X-Token").get(0);
 
-        RequestBuilder requestBuilder = new RequestBuilder();
+        RequestBuilder requestBuilder = new RequestBuilder("catering-core/");
         requestBuilder.addHeader("X-Token", token);
 
         for (int i = 0; i < 10000; i++) {
@@ -77,18 +77,18 @@ class CateringCoreFlow implements Runnable {
             int sleepDuration = new Random().nextInt(50) + 10;
             sleep(sleepDuration);
 
-//            requestBuilder.get(genericType, "rest/diner");
+//            requestBuilder.resource("rest/diner").get(ClientResponse.class);
 //            sleep(10);
 
-            requestBuilder.get("rest/diner/menus/2", genericType);
+            requestBuilder.resource("rest/diner/menus/2").get(ClientResponse.class);
 //            sleep(10);
 
             String menuPayload = "{\"menuId\":\"3\",\"id\":null,\"name\":\"Meatball\",\"price\":\"2.5\",\"created\":\"\",\"vegeterian\":null,\"foodType\":null,\"menu\":{\"id\":3}}";
-            requestBuilder.post("rest/menu_item", genericType, menuPayload);
+            requestBuilder.resource("rest/menu_item").post(menuPayload);
 //            sleep(10);
 
             String dinerPayload = "{\"id\":null,\"name\":\"Diner\",\"description\":\"Test diner\",\"picture\":\"-1\",\"modifyDate\":\"\",\"created\":\"\"}";
-            requestBuilder.post("rest/diner", genericType, dinerPayload);
+            requestBuilder.resource("rest/diner").post(dinerPayload);
 //            sleep(10);
 
 
