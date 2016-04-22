@@ -1,8 +1,6 @@
 package ee.ttu.thesis;
 
 import com.mcbfinance.aio.web.rest.SetHeaderFilter;
-import com.mcbfinance.aio.web.rest.model.AuthenticationInfoDTO;
-import com.mcbfinance.aio.web.rest.model.CustomerDTO;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -43,6 +41,14 @@ public class RequestBuilder {
         return this;
     }
 
+    public RequestBuilder builder() {
+        return this;
+    }
+
+    public void build() {
+        getClient();
+    }
+
     public WebResource resource(String path, Object... values) {
         return resource(UriBuilder.fromPath(path).build(values).toString());
     }
@@ -74,18 +80,9 @@ public class RequestBuilder {
         return client;
     }
 
-    protected CustomerDTO getCurrentCustomer() {
-        return resource("/authentication").get(AuthenticationInfoDTO.class).customer;
-    }
-
-    protected void logout() {
-        resource("/authentication").delete();
-    }
-
-
     public void setType(String mediaType) {
         removeContentType();
-        client.addFilter(new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, mediaType));
+        getClient().addFilter(new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, mediaType));
     }
 
     public void removeContentType() {

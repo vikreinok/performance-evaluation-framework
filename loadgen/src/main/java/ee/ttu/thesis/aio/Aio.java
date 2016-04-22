@@ -15,8 +15,6 @@ import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.UniformInterfaceException;
 import ee.ttu.thesis.RequestBuilder;
 import ee.ttu.thesis.aio.genrator.GeneratorUtil;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
@@ -29,43 +27,38 @@ import java.util.Random;
  */
 public class Aio {
 
+    public static final String CONTEXT_PATH = "loanengine/rest/";
+    public static final int EXECUTION_COUNT = 1000;
+
+    RequestBuilder rb = null;
+    InformationHolder informationHolder = null;
 
     public static void main(String[] args) {
         Aio aio = new Aio();
-        aio.start();
+
+        aio.registration();
+        for (int executionNumber = 0; executionNumber < EXECUTION_COUNT; executionNumber++) {
+            aio.viewSSAndDraw();
+        }
     }
 
-    private void start() {
-        RequestBuilder rb = new RequestBuilder("loanengine/rest/");
-        rb.addHeader("Host", "demo.sving.com");
-        rb.addHeader(CountryContextFilterFactory.BRAND_HEADER, "sving");
-        rb.addHeader(CountryContextFilterFactory.COUNTRY_HEADER, "EE");
-        rb.addHeader(CountryContextFilterFactory.LANGUAGE_HEADER, "et");
+    private void viewSSAndDraw() {
+        String ssn = informationHolder.getSsn();
 
-        final GenericType<Collection<String>> genericType = new GenericType<Collection<String>>() {
-        };
-//        registrationEESving(rb);
-        registrationEEC24(rb);
-        openApplicationForm(rb);
-        submitApplication(rb);
-        String randomProductId = productSelectionView(rb);
-        productSelection(rb, randomProductId);
-        afterApplicationSubmit(rb);
-        acceptCases(rb, 2);
-        String contractId = openSS(rb);
-//        changeDueDateInSS(rb, contractId);
-        clickOnAccountStatemetn(rb, contractId);
-        drawSS(rb, contractId);
-        acceptCases(rb, 1);
-        clickOnInvoicesAndContracts(rb, contractId);
+        setUp();
 
+        registerOrAuthenticateEESving(ssn);
+        generateInvoice();
+        String contractId = openSS();
+//        changeDueDateInSS();
+        clickOnAccountStatemetn(contractId);
+        drawSS(contractId);
+        acceptCases(1);
+        clickOnInvoicesAndContracts(contractId);
+        allocate(4000);
+        logout();
 
-        generateInvoice(rb);
-
-        if (true) {
-            return;
-        }
-
+        informationHolder.print();
 
         // SS
         //decrease CL
@@ -73,18 +66,76 @@ public class Aio {
         // click on change preferneces (eelistused)
 //        rb.post("credit-application/mmp", genericType, "{\"contractDeliveryMethod\":\"EMAIL\",\"invoiceDeliveryMethod\":\"EMAIL\",\"preDueDateReminderSMS\":\"false\",\"marketingPermission\":\"false\"}"); // {"mmp":0}
 
+    }
+
+    private void registration() {
+        setUp();
+
+        registerOrAuthenticateEESving(null);
+//        registrationEEC24();
+        openApplicationForm();
+        submitApplication();
+        String randomProductId = productSelectionView();
+        productSelection(randomProductId);
+        afterApplicationSubmit();
+        acceptCases(2);
+
+
+//        String contractId = openSS();
+////        changeDueDateInSS();
+//        clickOnAccountStatemetn(contractId);
+//        drawSS(contractId);
+//        acceptCases(1);
+//        clickOnInvoicesAndContracts(contractId);
+//        generateInvoice();
+////        processLateInvoice(invoiceId);
+//        allocate(10000);
+        logout();
+
+        informationHolder.print();
+
+        // SS
+        //decrease CL
+//        rb.get("contracts/26317933504/extra-services/predicted/changeCreditLine?upgrade=false", genericType);
+        // click on change preferneces (eelistused)
+//        rb.post("credit-application/mmp", genericType, "{\"contractDeliveryMethod\":\"EMAIL\",\"invoiceDeliveryMethod\":\"EMAIL\",\"preDueDateReminderSMS\":\"false\",\"marketingPermission\":\"false\"}"); // {"mmp":0}
 
     }
 
-    private void generateInvoice(RequestBuilder rb) {
-        rb.resource("developer/invoices/generate").queryParam("paid", "true").put();
+    private void setUp() {
+        rb = new RequestBuilder(CONTEXT_PATH);
+        rb.builder()
+                .addHeader("RandomHeader", "randomHeader")
+                .addHeader(CountryContextFilterFactory.BRAND_HEADER, "sving")
+                .addHeader(CountryContextFilterFactory.LANGUAGE_HEADER, "et")
+                .addHeader(CountryContextFilterFactory.COUNTRY_HEADER, "EE")
+                .build();
+
+        informationHolder = new InformationHolder();
     }
 
-    private void processLateInvoice(RequestBuilder rb, String invoiceId) {
+    private void generateInvoice() {
+        rb.resource("developer/invoices/generate").queryParam("paid", "false").put();
+    }
+
+    private void allocate(Integer amount) {
+//        rb.resource("developer/contracts/pay-now-payment").queryParam("amount", String.valueOf(amount)).put();
+        rb.resource("developer/contracts/allocate").queryParam("amount", String.valueOf(amount)).put();
+    }
+
+    private void processLateInvoice(String invoiceId) {
         rb.resource("developer/invoices/processLate").queryParam("id", invoiceId).put();
     }
 
-    private void clickOnInvoicesAndContracts(RequestBuilder rb, String contractId) {
+    protected CustomerDTO getCurrentCustomer() {
+        return rb.resource("authentication").get(AuthenticationInfoDTO.class).customer;
+    }
+
+    protected void logout() {
+        rb.resource("authentication").delete();
+    }
+
+    private void clickOnInvoicesAndContracts(String contractId) {
 
         Collection<InvoiceDTO> invoiceDTOs = rb.resource(String.format("contracts/%s/invoices", contractId)).get(new GenericType<Collection<InvoiceDTO>>() {});
         ClientResponse clientResponse = rb.resource(String.format("contracts/%s/document", contractId)).get(ClientResponse.class);
@@ -93,14 +144,14 @@ public class Aio {
         logToConsole(clientResponse);
     }
 
-    private void clickOnAccountStatemetn(RequestBuilder rb, String contractId) {
+    private void clickOnAccountStatemetn(String contractId) {
         AccountStatementDTO accountStatementDTO = rb.resource(String.format("contracts/%s/account-statement", contractId)).queryParam("from", "2016-01-07").get(AccountStatementDTO.class);
         logToConsole(accountStatementDTO);
     }
 
-    private void drawSS(RequestBuilder rb, String contractId) {
+    private void drawSS(String contractId) {
 
-        rb.resource(String.format("contracts/%s/draw", contractId)).put(new DrawDTO(10000)); //  204
+        rb.resource(String.format("contracts/%s/draw", contractId)).put(new DrawDTO(4000)); //  204
         ContractDTO contractDTO = rb.resource(String.format("contracts/%s", contractId)).get(ContractDTO.class);
         AccountStatementDTO accountStatementDTO = rb.resource(String.format("contracts/%s/account-statement", contractId)).queryParam("from", "2016-01-07").get(AccountStatementDTO.class);
         Collection<ProductWithExtraServicesDTO> clProductsProductWithExtraServicesDTOs = rb.resource("products/CREDIT_LINE").get(new GenericType<Collection<ProductWithExtraServicesDTO>>() {});
@@ -112,7 +163,7 @@ public class Aio {
         logToConsole(extraServices);
     }
 
-    private void changeDueDateInSS(RequestBuilder rb, String contractId) {
+    private void changeDueDateInSS() {
 
         // click on change DD
         DuedateRangeDTO duedateRangeDTO = rb.resource("credit-application/duedate/range").get(DuedateRangeDTO.class);
@@ -127,7 +178,7 @@ public class Aio {
         logToConsole(mmpdto3);
     }
 
-    private String openSS(RequestBuilder rb) {
+    private String openSS() {
         //        ClientResponse response = rb.resource("staticcontent").get(ClientResponse.class);
 
         AuthenticationInfoDTO authenticationInfoDTO = rb.resource("authentication").get(AuthenticationInfoDTO.class);
@@ -149,6 +200,13 @@ public class Aio {
         List<DrawSelectionsDTO> drawSelectionsDTOs = rb.resource(String.format("contracts/%s/draw-selections", contractId)).get(new GenericType<List<DrawSelectionsDTO>>() {}); // arrays of json objects
         Collection<ProductWithExtraServicesDTO> clProductsProductWithExtraServicesDTOs = rb.resource("products/CREDIT_LINE").get(new GenericType<Collection<ProductWithExtraServicesDTO>>() {});
 
+        informationHolder.setCustomerId(Long.valueOf(authenticationInfoDTO.customer.id));
+        informationHolder.setMsisdn(authenticationInfoDTO.customer.msisdn);
+        informationHolder.setSsn(authenticationInfoDTO.customer.identifier);
+        informationHolder.setOutstandingAmount(outstandingAmount);
+        informationHolder.setContractId(Long.valueOf(contractDTO.id));
+        informationHolder.setTransactionCount(contractDTO.pendingTransactions.size());
+
         logToConsole(authenticationInfoDTO);
         logToConsole(contractDTO);
         logToConsole(openInvoice);
@@ -161,8 +219,7 @@ public class Aio {
         return contractId;
     }
 
-    private void registrationEESving(RequestBuilder rb) {
-
+    private void registerOrAuthenticateEESving(String ssn) {
 
         Collection<String> banks = rb.resource("authentication/banks_ee/").get(new GenericType<Collection<String>>() {});
 
@@ -171,8 +228,11 @@ public class Aio {
 
         IPizzaAuthenticationResponseDTO iPizzaAuthenticationResponseDTO = rb.resource("authentication/banks_ee/dummy_bank_ee_id").post(IPizzaAuthenticationResponseDTO.class, bankAuthenticationRequestDTO);
 
+        if (ssn == null) {
+            ssn = GeneratorUtil.generateIdentifier();
+        }
+
         try {
-            String ssn = GeneratorUtil.generateIdentifier();
             String postEntity = "CSSN=" + ssn + "&t=" + iPizzaAuthenticationResponseDTO.transactionId;
             rb.removeContentType();
 
@@ -189,19 +249,20 @@ public class Aio {
         } finally {
             rb.setType(MediaType.APPLICATION_JSON);
         }
+        informationHolder.setSsn(ssn);
 
         logToConsole(banks);
         logToConsole(iPizzaAuthenticationResponseDTO);
     }
 
-    private void acceptCases(RequestBuilder rb, int nrOfCalls) {
+    private void acceptCases(int nrOfCalls) {
         // dev resource accept cases
         for (int count = 0; count < nrOfCalls; count++) {
             rb.resource("developer/cases").post(); // 204 no content
         }
     }
 
-    private void afterApplicationSubmit(RequestBuilder rb) {
+    private void afterApplicationSubmit() {
         // after submit
         SubmitApplicationDTO submitApplicationDTO = new SubmitApplicationDTO();
         submitApplicationDTO.firstDrawAmount = 0;
@@ -213,7 +274,7 @@ public class Aio {
         logToConsole(creditApplicationDTO2);
     }
 
-    private void productSelection(RequestBuilder rb, String randomProductId) {
+    private void productSelection(String randomProductId) {
         // submit view
         rb.resource("credit-application/product").put(new ProductSelectionWithFirstDrawtDTO(Long.valueOf(randomProductId), null)); // 204 no response
         DuedateRangeDTO duedateRangeDTO = rb.resource("credit-application/duedate/range").get(DuedateRangeDTO.class);
@@ -235,7 +296,7 @@ public class Aio {
         logToConsole(mmpdto3);
     }
 
-    private String productSelectionView(RequestBuilder rb) {
+    private String productSelectionView() {
         // Product selection view
 
         CreditApplicationDTO creditApplicationDTO = rb.resource("credit-application").get(CreditApplicationDTO.class);
@@ -256,15 +317,17 @@ public class Aio {
 
         if (creditLineProducts.size() > 0) {
             int randomIndex = new Random(System.currentTimeMillis()).nextInt(creditLineProducts.size() - 1);
-            String id = creditLineProducts.toArray(new ProductAvailableDTO[creditLineProducts.size()])[randomIndex].id;
-            System.out.println(id);
+            ProductAvailableDTO[] productAvailableDTOs = creditLineProducts.toArray(new ProductAvailableDTO[creditLineProducts.size()]);
+            ProductAvailableDTO productAvailableDTO = productAvailableDTOs[randomIndex];
+            String id = productAvailableDTO.id;
+            System.out.printf("Selected product ID %s principal %d%n", id, productAvailableDTO.principal);
             return id;
         }
 
         throw new IllegalStateException("Could find product from list");
     }
 
-    private void submitApplication(RequestBuilder rb) {
+    private void submitApplication() {
         // Submitting the application
         AuthenticationPostOfficeDTO authenticationPostOfficeDTO = new AuthenticationPostOfficeDTO();
         authenticationPostOfficeDTO.authenticationPostOfficeId = 1L;
@@ -316,9 +379,11 @@ public class Aio {
 
 
         rb.resource("credit-application/financialdata").put(estonianFinancialDataDTO); // 204 no response
+
+        informationHolder.setMsisdn(msisdn);
     }
 
-    private void openApplicationForm(RequestBuilder rb) {
+    private void openApplicationForm() {
         AuthenticationInfoDTO authenticationInfoDTO = rb.resource("authentication").get(AuthenticationInfoDTO.class);
 //        ClientResponse response = rb.resource("staticcontent").get(ClientResponse.class);
         try {
@@ -339,6 +404,8 @@ public class Aio {
             e.printStackTrace();
         }
 
+        informationHolder.setCustomerId(Long.valueOf(authenticationInfoDTO.customer.id));
+
 //        logToConsole(response);
         logToConsole(authenticationInfoDTO);
         logToConsole(creditApplicationPutDTO);
@@ -346,7 +413,7 @@ public class Aio {
         logToConsole(postOfficeDTOs.toArray());
     }
 
-    private void registrationEEC24(RequestBuilder rb) {
+    private void registrationEEC24() {
         UserRegistrationInitDataDTO userRegistrationInitDataDTO = new UserRegistrationInitDataDTO();
         String ssn = GeneratorUtil.generateIdentifier();
         String msisdn = GeneratorUtil.generateMsisd();
@@ -371,11 +438,15 @@ public class Aio {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        informationHolder.setSsn(ssn);
+        informationHolder.setMsisdn(msisdn);
+
 //        logToConsole(response);
     }
 
     public static void logToConsole(Object obj) {
-        System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
+//        System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
     }
 
 

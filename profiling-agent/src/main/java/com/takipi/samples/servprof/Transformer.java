@@ -21,6 +21,11 @@ public class Transformer implements ClassFileTransformer {
 		this.options = options;
 	}
 
+	public Transformer() {
+		this.instFilter = null;
+		this.options = null;
+	}
+
 	@Override
 	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
