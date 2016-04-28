@@ -1,11 +1,12 @@
 package ee.ttu.thesis;
 
-import com.mcbfinance.aio.web.rest.SetHeaderFilter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import ee.ttu.thesis.aio.model.RequestInformation;
 import ee.ttu.thesis.filter.ResponseTimeFilter;
+import ee.ttu.thesis.filter.SetHeaderFilter;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -29,8 +30,7 @@ public class RequestBuilder {
     protected String contextPath = "";
     protected Client client;
 
-    private String threadId;
-    private String periodNumber;
+    protected RequestInformation requestInformation;
 
     private List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>(4);
 
@@ -54,8 +54,8 @@ public class RequestBuilder {
     }
 
     public WebResource resource(String path, String requestId, Object... values) {
-        String requestIdentifier = String.format("%s_%s_%s", threadId, requestId, periodNumber);
-        setRequestIdFilter(requestIdentifier);
+        String requestIdentifier = requestInformation.buildRequestIdentifier(requestId);
+        setRequestIdFilterValue(requestIdentifier);
         return resource(UriBuilder.fromPath(path).build(values).toString());
     }
 
@@ -97,16 +97,12 @@ public class RequestBuilder {
         getClient().removeFilter(DEFAULT_CONTENT_TYPE_HEADER);
     }
 
-    public void setRequestIdFilter(String requestId) {
+    public void setRequestIdFilterValue(String requestId) {
         getClient().removeFilter(DEFAULT_REQUEST_ID_FILTER);
         getClient().addFilter(new SetHeaderFilter(HEADER_NAME_REQUEST_ID, requestId));
     }
 
-    public void setPeriodNumber(String periodNumber) {
-        this.periodNumber = periodNumber;
-    }
-
-    public void setThreadId(String threadId) {
-        this.threadId = threadId;
+    public void setRequestInformation(RequestInformation requestInformation) {
+        this.requestInformation = requestInformation;
     }
 }

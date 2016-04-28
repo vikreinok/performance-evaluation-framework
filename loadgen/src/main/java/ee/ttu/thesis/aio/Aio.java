@@ -16,6 +16,8 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import ee.ttu.thesis.NamedThreadPoolExecutor;
 import ee.ttu.thesis.RequestBuilder;
 import ee.ttu.thesis.aio.genrator.GeneratorUtil;
+import ee.ttu.thesis.aio.model.DomainInformation;
+import ee.ttu.thesis.aio.model.RequestInformation;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -36,10 +38,8 @@ public class Aio  {
     public static final int PARRALEL_THREADS = 2;
 
     protected RequestBuilder rb = null;
-    protected DomainInformationHolder domainInformationHolder = null;
-
-    private String threadIdentifier;
-    private String periodNumber = "0000";
+    protected DomainInformation domainInformation = null;
+    protected RequestInformation requestInformation = new RequestInformation();
 
     public Aio() {
     }
@@ -61,7 +61,7 @@ public class Aio  {
         for (int index = 0; index <= PARRALEL_THREADS; index++) {
 
             String threadName = "AioRequesterNr_" + index;
-            String threadIdentifier = String.valueOf(index);
+            Integer threadIdentifier = index;
 
             threadPoolExecutor.execute(new AioFlow(threadName, threadIdentifier));
         }
@@ -92,7 +92,7 @@ public class Aio  {
 //        allocate(10000);
         logout();
 
-        domainInformationHolder.print();
+        domainInformation.print();
 
         // SS
         //decrease CL
@@ -103,7 +103,7 @@ public class Aio  {
     }
 
     public void viewSSAndDraw() {
-        String ssn = domainInformationHolder.getSsn();
+        String ssn = domainInformation.getSsn();
 
         setUp();
 
@@ -118,7 +118,7 @@ public class Aio  {
         allocate(4000);
         logout();
 
-        domainInformationHolder.print();
+        domainInformation.print();
 
         // SS
         //decrease CL
@@ -141,9 +141,8 @@ public class Aio  {
                 .addHeader(CountryContextFilterFactory.COUNTRY_HEADER, "EE")
                 .build();
 
-        rb.setThreadId(threadIdentifier);
-        rb.setPeriodNumber(periodNumber);
-        domainInformationHolder = new DomainInformationHolder();
+        rb.setRequestInformation(requestInformation);
+        domainInformation = new DomainInformation();
     }
 
     private void generateInvoice() {
@@ -228,12 +227,12 @@ public class Aio  {
         List<DrawSelectionsDTO> drawSelectionsDTOs = rb.resource(String.format("contracts/%s/draw-selections", contractId), "00770").get(new GenericType<List<DrawSelectionsDTO>>() {}); // arrays of json objects
         Collection<ProductWithExtraServicesDTO> clProductsProductWithExtraServicesDTOs = rb.resource("products/CREDIT_LINE", "00780").get(new GenericType<Collection<ProductWithExtraServicesDTO>>() {});
 
-        domainInformationHolder.setCustomerId(Long.valueOf(authenticationInfoDTO.customer.id));
-        domainInformationHolder.setMsisdn(authenticationInfoDTO.customer.msisdn);
-        domainInformationHolder.setSsn(authenticationInfoDTO.customer.identifier);
-        domainInformationHolder.setOutstandingAmount(outstandingAmount);
-        domainInformationHolder.setContractId(Long.valueOf(contractDTO.id));
-        domainInformationHolder.setTransactionCount(contractDTO.pendingTransactions.size());
+        domainInformation.setCustomerId(Long.valueOf(authenticationInfoDTO.customer.id));
+        domainInformation.setMsisdn(authenticationInfoDTO.customer.msisdn);
+        domainInformation.setSsn(authenticationInfoDTO.customer.identifier);
+        domainInformation.setOutstandingAmount(outstandingAmount);
+        domainInformation.setContractId(Long.valueOf(contractDTO.id));
+        domainInformation.setTransactionCount(contractDTO.pendingTransactions.size());
 
         logToConsole(authenticationInfoDTO);
         logToConsole(contractDTO);
@@ -278,7 +277,7 @@ public class Aio  {
         } finally {
             rb.setType(MediaType.APPLICATION_JSON);
         }
-        domainInformationHolder.setSsn(ssn);
+        domainInformation.setSsn(ssn);
 
         logToConsole(banks);
         logToConsole(iPizzaAuthenticationResponseDTO);
@@ -409,7 +408,7 @@ public class Aio  {
 
         rb.resource("credit-application/financialdata", "00340").put(estonianFinancialDataDTO); // 204 no response
 
-        domainInformationHolder.setMsisdn(msisdn);
+        domainInformation.setMsisdn(msisdn);
     }
 
     private void openApplicationForm() {
@@ -433,7 +432,7 @@ public class Aio  {
             e.printStackTrace();
         }
 
-        domainInformationHolder.setCustomerId(Long.valueOf(authenticationInfoDTO.customer.id));
+        domainInformation.setCustomerId(Long.valueOf(authenticationInfoDTO.customer.id));
 
 //        logToConsole(response);
         logToConsole(authenticationInfoDTO);
@@ -468,8 +467,8 @@ public class Aio  {
             e.printStackTrace();
         }
 
-        domainInformationHolder.setSsn(ssn);
-        domainInformationHolder.setMsisdn(msisdn);
+        domainInformation.setSsn(ssn);
+        domainInformation.setMsisdn(msisdn);
 
 //        logToConsole(response);
     }
@@ -478,12 +477,8 @@ public class Aio  {
 //        System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
     }
 
-    public void setPeriodNumber(String periodNumber) {
-        this.periodNumber = periodNumber;
-    }
-
-    public void setThreadIdentifier(String threadIdentifier) {
-        this.threadIdentifier = threadIdentifier;
+    public RequestInformation getRequestInformation() {
+        return requestInformation;
     }
 }
 
@@ -491,9 +486,9 @@ public class Aio  {
 class AioFlow implements Runnable {
 
     private String name;
-    private String threadIdentifier;
+    private int threadIdentifier;
 
-    public AioFlow(String name, String threadIdentifier) {
+    public AioFlow(String name, Integer threadIdentifier) {
         this.name = name;
         this.threadIdentifier = threadIdentifier;
     }
@@ -501,14 +496,16 @@ class AioFlow implements Runnable {
     public void run() {
         Aio aio = new Aio();
 
-        aio.setPeriodNumber(String.format("%04d", 0));
-        aio.setThreadIdentifier(String.format("%03d", threadIdentifier));
+        RequestInformation requestInformation = aio.getRequestInformation();
+
+        requestInformation.setPeriodNumber(0);
+        requestInformation.setThreadIdentifier(threadIdentifier);
 
         aio.registration();
 
         try {
             for (int executionNumber = 0; executionNumber < Aio.EXECUTION_COUNT; executionNumber++) {
-                aio.setPeriodNumber(String.format("%04d", executionNumber));
+                requestInformation.setPeriodNumber(executionNumber);
                 aio.viewSSAndDraw();
             }
         } catch (Exception e) {
