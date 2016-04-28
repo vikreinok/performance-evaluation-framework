@@ -3,7 +3,7 @@ package ee.ttu.thesis.aio;
 /**
  *
  */
-public class InformationHolder {
+public class DomainInformationHolder {
 
     protected String ssn;
     protected String msisdn;
@@ -63,7 +63,7 @@ public class InformationHolder {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("InformationHolder{");
+        final StringBuffer sb = new StringBuffer("DomainInformationHolder{");
         sb.append("ssn='").append(ssn).append('\'');
         sb.append(", msisdn='").append(msisdn).append('\'');
         sb.append(", contractId=").append(contractId);

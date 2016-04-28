@@ -29,6 +29,9 @@ public class RequestBuilder {
     protected String contextPath = "";
     protected Client client;
 
+    private String threadId;
+    private String periodNumber;
+
     private List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>(4);
 
     public RequestBuilder(String contextPath) {
@@ -50,8 +53,9 @@ public class RequestBuilder {
         getClient();
     }
 
-    public WebResource resource(String path, Object... values) {
-        setRequestIdFilter("");
+    public WebResource resource(String path, String requestId, Object... values) {
+        String requestIdentifier = String.format("%s_%s_%s", threadId, requestId, periodNumber);
+        setRequestIdFilter(requestIdentifier);
         return resource(UriBuilder.fromPath(path).build(values).toString());
     }
 
@@ -98,5 +102,11 @@ public class RequestBuilder {
         getClient().addFilter(new SetHeaderFilter(HEADER_NAME_REQUEST_ID, requestId));
     }
 
+    public void setPeriodNumber(String periodNumber) {
+        this.periodNumber = periodNumber;
+    }
 
+    public void setThreadId(String threadId) {
+        this.threadId = threadId;
+    }
 }

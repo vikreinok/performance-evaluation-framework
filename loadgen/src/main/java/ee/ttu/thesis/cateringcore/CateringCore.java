@@ -66,7 +66,7 @@ class CateringCoreFlow implements Runnable {
         RequestBuilder authBuilder = new RequestBuilder("catering-core/");
         authBuilder.addHeader("Authorization", "YWRtaW46YWRtaW4=");
 
-        ClientResponse clientResponse = authBuilder.resource("rest/login").post(ClientResponse.class);
+        ClientResponse clientResponse = authBuilder.resource("rest/login", "00000").post(ClientResponse.class);
         String token = clientResponse.getHeaders().get("X-Token").get(0);
 
         RequestBuilder requestBuilder = new RequestBuilder("catering-core/");
@@ -80,15 +80,15 @@ class CateringCoreFlow implements Runnable {
 //            requestBuilder.resource("rest/diner").get(ClientResponse.class);
 //            sleep(10);
 
-            requestBuilder.resource("rest/diner/menus/2").get(ClientResponse.class);
+            requestBuilder.resource("rest/diner/menus/2", "00000").get(ClientResponse.class);
 //            sleep(10);
 
             String menuPayload = "{\"menuId\":\"3\",\"id\":null,\"name\":\"Meatball\",\"price\":\"2.5\",\"created\":\"\",\"vegeterian\":null,\"foodType\":null,\"menu\":{\"id\":3}}";
-            requestBuilder.resource("rest/menu_item").post(menuPayload);
+            requestBuilder.resource("rest/menu_item", "00000").post(menuPayload);
 //            sleep(10);
 
             String dinerPayload = "{\"id\":null,\"name\":\"Diner\",\"description\":\"Test diner\",\"picture\":\"-1\",\"modifyDate\":\"\",\"created\":\"\"}";
-            requestBuilder.resource("rest/diner").post(dinerPayload);
+            requestBuilder.resource("rest/diner", "00000").post(dinerPayload);
 //            sleep(10);
 
 
