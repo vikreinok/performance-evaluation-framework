@@ -21,6 +21,7 @@
     <modules>
         <module>profiling-agent</module>
         <module>loadgen</module>
+        <module>analyzer</module>
     </modules>
 
     <repositories>
