@@ -5,6 +5,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import ee.ttu.thesis.filter.ResponseTimeFilter;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -20,9 +21,9 @@ import java.util.Map;
  */
 public class RequestBuilder {
 
-    public static final String HEADER_NAME_COOKIE = "Cookie";
-    public static final String HEADER_NAME_SET_COOKIE = "Set-Cookie";
-    public static final SetHeaderFilter DEFAULT_CONTENT_TYPE_HEADER = new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+    public static final String HEADER_NAME_REQUEST_ID = "request-id";
+    public final SetHeaderFilter DEFAULT_CONTENT_TYPE_HEADER = new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+    public final SetHeaderFilter DEFAULT_REQUEST_ID_FILTER = new SetHeaderFilter(HEADER_NAME_REQUEST_ID, "");
 
     private String host = "http://localhost:8080/";
     protected String contextPath = "";
@@ -50,6 +51,7 @@ public class RequestBuilder {
     }
 
     public WebResource resource(String path, Object... values) {
+        setRequestIdFilter("");
         return resource(UriBuilder.fromPath(path).build(values).toString());
     }
 
@@ -69,10 +71,12 @@ public class RequestBuilder {
                 client.addFilter(new SetHeaderFilter(header.getKey(), header.getValue()));
             }
 
-            client.addFilter(new SetHeaderFilter(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON + ", " + MediaType.WILDCARD));
+//            client.addFilter(new SetHeaderFilter(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON + ", " + MediaType.WILDCARD));
             client.addFilter(DEFAULT_CONTENT_TYPE_HEADER);
+
 //            Adds logging
 //            client.addFilter(new LoggingFilter(System.out));
+            client.addFilter(new ResponseTimeFilter());
 
             client.setFollowRedirects(false);
         }
@@ -88,4 +92,11 @@ public class RequestBuilder {
     public void removeContentType() {
         getClient().removeFilter(DEFAULT_CONTENT_TYPE_HEADER);
     }
+
+    public void setRequestIdFilter(String requestId) {
+        getClient().removeFilter(DEFAULT_REQUEST_ID_FILTER);
+        getClient().addFilter(new SetHeaderFilter(HEADER_NAME_REQUEST_ID, requestId));
+    }
+
+
 }

@@ -13,36 +13,62 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.UniformInterfaceException;
+import ee.ttu.thesis.NamedThreadPoolExecutor;
 import ee.ttu.thesis.RequestBuilder;
 import ee.ttu.thesis.aio.genrator.GeneratorUtil;
 
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  */
-public class Aio {
+public class Aio  {
 
     public static final String CONTEXT_PATH = "loanengine/rest/";
     public static final int EXECUTION_COUNT = 1000;
+    public static final int PARRALEL_THREADS = 2;
 
-    RequestBuilder rb = null;
-    InformationHolder informationHolder = null;
+    protected  RequestBuilder rb = null;
+    protected InformationHolder informationHolder = null;
+    private String threadIdentifier;
+    private String periodNumber = "000";
 
-    public static void main(String[] args) {
-        Aio aio = new Aio();
-
-        aio.registration();
-        for (int executionNumber = 0; executionNumber < EXECUTION_COUNT; executionNumber++) {
-            aio.viewSSAndDraw();
-        }
+    public Aio(String threadIdentifier) {
+        this.threadIdentifier = threadIdentifier;
     }
 
-    private void viewSSAndDraw() {
+    public static void main(String[] args) {
+        Aio.start();
+    }
+
+    public static void start() {
+
+        ThreadPoolExecutor threadPoolExecutor =
+                new NamedThreadPoolExecutor(
+                        5,
+                        100,
+                        5000,
+                        TimeUnit.MILLISECONDS,
+                        "-AioRequestThreadPoolExecutor-"
+                );
+        for (int index = 0; index <= PARRALEL_THREADS; index++) {
+
+            String threadName = "AioRequesterNr_" + index;
+            String threadIdentifier = String.valueOf(index);
+
+            threadPoolExecutor.execute(new AioFlow(threadName, threadIdentifier));
+        }
+        threadPoolExecutor.shutdown();
+    }
+
+    public void viewSSAndDraw() {
         String ssn = informationHolder.getSsn();
 
         setUp();
@@ -68,11 +94,11 @@ public class Aio {
 
     }
 
-    private void registration() {
+    public void registration() {
         setUp();
 
-        registerOrAuthenticateEESving(null);
 //        registrationEEC24();
+        registerOrAuthenticateEESving(null);
         openApplicationForm();
         submitApplication();
         String randomProductId = productSelectionView();
@@ -102,6 +128,10 @@ public class Aio {
 
     }
 
+    protected CustomerDTO getCurrentCustomer() {
+        return rb.resource("authentication").get(AuthenticationInfoDTO.class).customer;
+    }
+
     private void setUp() {
         rb = new RequestBuilder(CONTEXT_PATH);
         rb.builder()
@@ -125,10 +155,6 @@ public class Aio {
 
     private void processLateInvoice(String invoiceId) {
         rb.resource("developer/invoices/processLate").queryParam("id", invoiceId).put();
-    }
-
-    protected CustomerDTO getCurrentCustomer() {
-        return rb.resource("authentication").get(AuthenticationInfoDTO.class).customer;
     }
 
     protected void logout() {
@@ -221,7 +247,8 @@ public class Aio {
 
     private void registerOrAuthenticateEESving(String ssn) {
 
-        Collection<String> banks = rb.resource("authentication/banks_ee/").get(new GenericType<Collection<String>>() {});
+        Collection<String> banks = rb.resource("authentication/banks_ee/").get(new GenericType<Collection<String>>() {
+        });
 
         BankAuthenticationRequestDTO bankAuthenticationRequestDTO = new BankAuthenticationRequestDTO();
         bankAuthenticationRequestDTO.callbackUrl = "https://demo.sving.com/ee/application/";
@@ -242,7 +269,7 @@ public class Aio {
                     .type(MediaType.APPLICATION_FORM_URLENCODED)
                     .post(ClientResponse.class, postEntity);
             if (clientResponse.getStatus() == 303) {
-                rb.addHeader(RequestBuilder.HEADER_NAME_COOKIE, clientResponse.getHeaders().get(RequestBuilder.HEADER_NAME_SET_COOKIE).get(0));
+                rb.addHeader(HttpHeaders.COOKIE, clientResponse.getHeaders().get(HttpHeaders.SET_COOKIE).get(0));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -253,6 +280,11 @@ public class Aio {
 
         logToConsole(banks);
         logToConsole(iPizzaAuthenticationResponseDTO);
+    }
+
+    private void setRequestIdHeader(String requestId) {
+        String requestIdentifier = threadIdentifier + "_" + periodNumber + "_" + requestId;
+        rb.setRequestIdFilter(requestIdentifier);
     }
 
     private void acceptCases(int nrOfCalls) {
@@ -433,7 +465,7 @@ public class Aio {
         try {
             ClientResponse clientResponse = rb.resource("authentication/user-registration/register-confirm-ee").post(ClientResponse.class, userRegistrationEEDataDTO);
             if (clientResponse.getStatus() == 204) {
-                rb.addHeader(RequestBuilder.HEADER_NAME_COOKIE, clientResponse.getHeaders().get(RequestBuilder.HEADER_NAME_SET_COOKIE).get(0));
+                rb.addHeader(HttpHeaders.COOKIE, clientResponse.getHeaders().get(HttpHeaders.SET_COOKIE).get(0));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -449,5 +481,31 @@ public class Aio {
 //        System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
     }
 
+    public void setPeriodNumber(String periodNumber) {
+        this.periodNumber = periodNumber;
+    }
+}
 
+
+class AioFlow implements Runnable {
+
+
+    private String name;
+    private String threadIdentifier;
+
+    public AioFlow(String name, String threadIdentifier) {
+        this.name = name;
+        this.threadIdentifier = threadIdentifier;
+    }
+
+    public void run() {
+        Aio aio = new Aio(threadIdentifier);
+
+        aio.registration();
+        for (int executionNumber = 0; executionNumber < Aio.EXECUTION_COUNT; executionNumber++) {
+            aio.setPeriodNumber(String.format("%03d", executionNumber));
+            aio.viewSSAndDraw();
+        }
+
+    }
 }
