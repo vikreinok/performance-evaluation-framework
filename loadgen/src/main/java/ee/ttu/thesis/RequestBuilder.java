@@ -20,13 +20,13 @@ public class RequestBuilder {
 
     public static final String HEADER_NAME_REQUEST_ID = "request-id";
     public final SetHeaderFilter DEFAULT_CONTENT_TYPE_HEADER = new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
-    public final SetHeaderFilter DEFAULT_REQUEST_ID_FILTER = new SetHeaderFilter(HEADER_NAME_REQUEST_ID, "");
 
-    private String host = "http://localhost:8080/";
+    public SetHeaderFilter requestIdFilter = new SetHeaderFilter(HEADER_NAME_REQUEST_ID, "");
+
     protected String contextPath = "";
     protected Client client;
-
     protected RequestInformation requestInformation;
+    private String host = "http://localhost:8080/";
 
     public RequestBuilder(String contextPath) {
         this.contextPath = contextPath;
@@ -66,7 +66,7 @@ public class RequestBuilder {
 
             client.addFilter(DEFAULT_CONTENT_TYPE_HEADER);
 
- //            client.addFilter(new LoggingFilter(System.out));
+            //            client.addFilter(new LoggingFilter(System.out));
             client.addFilter(new ResponseTimeFilter());
 
             client.setFollowRedirects(false);
@@ -85,8 +85,12 @@ public class RequestBuilder {
     }
 
     public void setRequestIdFilterValue(String requestId) {
-        getClient().removeFilter(DEFAULT_REQUEST_ID_FILTER);
-        getClient().addFilter(new SetHeaderFilter(HEADER_NAME_REQUEST_ID, requestId));
+        if (getClient().isFilterPresent(requestIdFilter)) {
+            getClient().removeFilter(requestIdFilter);
+        }
+        requestIdFilter = new SetHeaderFilter(HEADER_NAME_REQUEST_ID, requestId);
+        getClient().addFilter(requestIdFilter);
+
     }
 
     public void setRequestInformation(RequestInformation requestInformation) {

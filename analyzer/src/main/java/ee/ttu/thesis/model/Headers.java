@@ -20,7 +20,8 @@ import java.util.Map;
     "x-language",
     "randomheader",
     "accept",
-    "user-agent"
+    "user-agent",
+    "request-id"
 })
 public class Headers {
 
@@ -44,6 +45,8 @@ public class Headers {
     private String accept;
     @JsonProperty("user-agent")
     private String userAgent;
+    @JsonProperty("request-id")
+    private String requestId;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -245,6 +248,16 @@ public class Headers {
     @JsonProperty("user-agent")
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    @JsonProperty("request-id")
+    public String getRequestId() {
+        return requestId;
+    }
+
+    @JsonProperty("request-id")
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     @JsonAnyGetter

@@ -1,0 +1,18 @@
+{
+  "from": 0,
+  "size": 0,
+  "aggs": {
+    "group_by_method": {
+      "terms": {
+        "field": "method"
+      },
+      "aggs": {
+        "group_by_statusCode": {
+          "terms": {
+            "field": "statusCode"
+          }
+        }
+      }
+    }
+  }
+}
