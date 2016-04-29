@@ -10,13 +10,13 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>load-generator</artifactId>
+    <artifactId>commons</artifactId>
     <packaging>pom</packaging>
 
 
     <properties>
-        <spring.version>4.0.5.RELEASE</spring.version>
-        <spring.security.version>3.2.5.RELEASE</spring.security.version>
+      
+ 
     </properties>
 
     <build>
@@ -54,10 +54,14 @@
     </build>
 
     <dependencies>
+
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>commons</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-json</artifactId>
         </dependency>
 
         <dependency>
@@ -70,55 +74,8 @@
             <artifactId>commons-lang</artifactId>
             <version>2.6</version>
         </dependency>
-
-        <!--Required running DTOs-->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.collections</groupId>
-            <artifactId>collections-generic</artifactId>
-            <version>4.01</version>
-        </dependency>
-        <!--Required running DTOs-->
-
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-
+      
     </dependencies>
+
 
 </project>

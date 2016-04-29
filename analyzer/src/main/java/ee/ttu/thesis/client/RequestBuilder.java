@@ -4,6 +4,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import ee.ttu.thesis.filter.SetHeaderFilter;
 import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -70,9 +71,6 @@ public class RequestBuilder {
 //            client.addFilter(new SetHeaderFilter(HttpHeaders.ACCEPT, MediaType.TEXT_HTML, MediaType.APPLICATION_XHTML_XML, MediaType.APPLICATION_XML, MediaType.WILDCARD));
 
             client.addFilter(new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED, "charset=UTF-8"));
-
-//            Adds logging
-//            client.addFilter(new LoggingFilter(System.out));
 
             client.setFollowRedirects(false);
         }

@@ -1,4 +1,4 @@
-package ee.ttu.thesis.client;
+package ee.ttu.thesis.filter;
 
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;

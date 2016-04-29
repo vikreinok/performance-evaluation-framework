@@ -10,13 +10,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>load-generator</artifactId>
+    <artifactId>analyzer</artifactId>
     <packaging>pom</packaging>
 
 
     <properties>
-        <spring.version>4.0.5.RELEASE</spring.version>
-        <spring.security.version>3.2.5.RELEASE</spring.security.version>
+        <es.version>2.3.1</es.version>
     </properties>
 
     <build>
@@ -43,10 +42,7 @@
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
-                        <!-- NOTE: IDEA maven import doesn't seem to import the proc:none option properly. For project res to work under IDEA, add the -proc:none compiler option
-                            manually in Preferences -> Compiler -> Java Compiler Also, in case of internal compiler errors, switch to use another compiler, e.g. the "Javac in-process" one might work better. -->
                         <proc>none</proc>
-                        <!-- <compilerArgument>-proc:none</compilerArgument> -->
                     </configuration>
                 </plugin>
             </plugins>
@@ -54,10 +50,24 @@
     </build>
 
     <dependencies>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>commons</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.7.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${es.version}</version>
         </dependency>
 
         <dependency>
@@ -70,55 +80,16 @@
             <artifactId>commons-lang</artifactId>
             <version>2.6</version>
         </dependency>
-
-        <!--Required running DTOs-->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>${spring.security.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.collections</groupId>
-            <artifactId>collections-generic</artifactId>
-            <version>4.01</version>
-        </dependency>
-        <!--Required running DTOs-->
-
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
-        </dependency>
+         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
+         </dependency>
 
     </dependencies>
+
 
 </project>
