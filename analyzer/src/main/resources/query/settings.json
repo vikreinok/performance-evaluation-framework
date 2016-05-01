@@ -1,33 +1,43 @@
 {
-  "settings": {
-    "analysis": {
-      "filter": {
-        "capture_domain_filter": {
-          "type": "pattern_capture",
-          "preserve_original": false,
-          "flags": "CASE_INSENSITIVE",
-          "patterns": [
-            "https?:\/\/([^/]+)"
-          ]
-        }
-      },
-      "analyzer": {
-        "domain_analyzer": {
-          "type": "custom",
-          "tokenizer": "keyword",
-          "filter": [
-            "capture_domain_filter"
-          ]
-        }
-      }
-    }
-  },
+//  "settings": {
+//    "analysis": {
+//      "filter": {
+//        "capture_domain_filter": {
+//          "type": "pattern_capture",
+//          "preserve_original": false,
+//          "flags": "CASE_INSENSITIVE",
+//          "patterns": [
+//            "https?:\/\/([^/]+)"
+//          ]
+//        }
+//      },
+//      "analyzer": {
+//        "domain_analyzer": {
+//          "type": "custom",
+//          "tokenizer": "keyword",
+//          "filter": [
+//            "capture_domain_filter"
+//          ]
+//        }
+//      }
+//    }
+//  },
+//  "mappings": {
+//    "weblink": {
+//      "properties": {
+//        "url": {
+//          "type": "string",
+//          "analyzer": "domain_analyzer"
+//        }
+//      }
+//    }
+//  }
+
   "mappings": {
-    "weblink": {
+    "my_type": {
       "properties": {
-        "url": {
-          "type": "string",
-          "analyzer": "domain_analyzer"
+        "is_published": {
+          "type": "boolean"
         }
       }
     }

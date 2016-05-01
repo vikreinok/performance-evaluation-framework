@@ -1,0 +1,33 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "application": "PetClinic"
+          }
+        },
+        {
+          "match": {
+            "instance": "localhost"
+          }
+        },
+        {
+          "term": {
+            "containsCallTree": true
+          }
+        },
+        {
+          "regexp": {
+            "headers.request-id": {
+              "value": "[0-9]{3}_005000_[0-9]{4}"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "from": 0,
+  "size": 1000
+}
+

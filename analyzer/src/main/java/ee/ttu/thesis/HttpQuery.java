@@ -30,28 +30,16 @@ public class HttpQuery {
         try {
             RequestBuilder rb = new RequestBuilder("");
 
-            String index = "stagemonitor-requests-2016.04.29";
+            String index = "stagemonitor-requests-2016.05.01";
             String type = "/requests";
             String path = index + type + "/_search";
             String settingsPath = index + type + "/_search";
-//            ClientResponse clientResponse = rb.resource(path).get(ClientResponse.class);
+
+            getSettings(rb, settingsPath);
+            putSettings(rb, settingsPath);
 
 
-//            ClientResponse settingsGetClientResponse = rb.resource(settingsPath).get(ClientResponse.class);
-//            String settingsGetContent = getString(settingsGetClientResponse.getEntityInputStream());
-//            log(settingsGetContent);
-
-
-//            String settingsPayload = getQuery("settings.json");
-//            ClientResponse settingsPutClientResponse = rb.resource(settingsPath).put(ClientResponse.class, settingsPayload);
-//            String settingsPutContent = getString(settingsPutClientResponse.getEntityInputStream());
-//            log(settingsPutContent);
-
-
-//            String payload = getQuery("containsCallTree.json");
-//            String payload = getQuery("groupByHttpMethod.json");
-//            String payload = getQuery("groupByHttpMethoddAndUrl.json");
-            String payload = getQuery("groupByHttpHeaderValue.json");
+            String payload = getQuery("petclinic_generic.json");
             ClientResponse clientResponse = rb.resource(path).post(ClientResponse.class, payload);
             String content = getString(clientResponse.getEntityInputStream());
             log(content);
@@ -80,6 +68,19 @@ public class HttpQuery {
             e.printStackTrace();
         }
 
+    }
+
+    private void getSettings(RequestBuilder rb, String settingsPath) {
+        ClientResponse settingsGetClientResponse = rb.resource(settingsPath).get(ClientResponse.class);
+        String settingsGetContent = getString(settingsGetClientResponse.getEntityInputStream());
+        log(settingsGetContent);
+    }
+
+    private void putSettings(RequestBuilder rb, String settingsPath) {
+//        String settingsPayload = getQuery("settings.json");
+//        ClientResponse settingsPutClientResponse = rb.resource(settingsPath).put(ClientResponse.class, settingsPayload);
+//        String settingsPutContent = getString(settingsPutClientResponse.getEntityInputStream());
+//        log(settingsPutContent);
     }
 
     protected String getQuery(String name) {

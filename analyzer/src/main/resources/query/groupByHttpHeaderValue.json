@@ -3,11 +3,17 @@
   "size": 0,
   "aggs": {
     "group_by_request-id": {
-      "terms": {
-        "size": 0,
-        "field": "headers.request-id",
-        "include" : "[0-9]{3}_[0-9]{5}_[0-9]{4}"
+      "filter" : {
+        "regexp":{
+          "headers.request-id" : "[0-9]{3}_000000_[0-9]{4}"
+        }
       }
+//      "terms": {
+//        "size": 0,
+//        "field": "headers.request-id"
+//
+//        //        "include" : "[0-9]{3}_[0-9]{5}_[0-9]{4}"
+//      }
     }
   }
 }

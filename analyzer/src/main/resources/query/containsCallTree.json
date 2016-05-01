@@ -1,8 +1,0 @@
-{
-  "size": 0,
-  "query": {
-    "match": {
-      "containsCallTree": true
-    }
-  }
-}
