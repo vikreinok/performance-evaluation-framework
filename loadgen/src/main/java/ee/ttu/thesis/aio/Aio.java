@@ -58,7 +58,7 @@ public class Aio  {
                         TimeUnit.MILLISECONDS,
                         "-AioRequestThreadPoolExecutor-"
                 );
-        for (int index = 0; index <= PARRALEL_THREADS; index++) {
+        for (int index = 0; index < PARRALEL_THREADS; index++) {
 
             String threadName = "AioRequesterNr_" + index;
             Integer threadIdentifier = index;

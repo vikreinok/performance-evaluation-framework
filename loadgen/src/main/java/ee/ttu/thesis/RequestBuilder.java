@@ -32,6 +32,11 @@ public class RequestBuilder {
         this.contextPath = contextPath;
     }
 
+    public RequestBuilder(String host, String contextPath) {
+        this.host = host;
+        this.contextPath = contextPath;
+    }
+
     public RequestBuilder addHeader(String name, String value) {
         getClient().addFilter(new SetHeaderFilter(name, value));
         return this;
@@ -52,7 +57,15 @@ public class RequestBuilder {
     }
 
     protected WebResource resource(String path) {
-        WebResource resource = getClient().resource(host + contextPath + path);
+
+        String uri;
+        if (path.contains("http://") || path.contains("https://")) {
+            uri = path;
+        } else {
+            uri = host + contextPath + path;
+        }
+
+        WebResource resource = getClient().resource(uri);
         return resource;
     }
 
@@ -66,7 +79,7 @@ public class RequestBuilder {
 
             client.addFilter(DEFAULT_CONTENT_TYPE_HEADER);
 
-            //            client.addFilter(new LoggingFilter(System.out));
+//            client.addFilter(new LoggingFilter(System.out));
             client.addFilter(new ResponseTimeFilter());
 
             client.setFollowRedirects(false);
