@@ -1,5 +1,5 @@
 
-package ee.ttu.thesis.model;
+package ee.ttu.thesis.model.stagemonitor;
 
 import org.codehaus.jackson.annotate.*;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -17,10 +17,10 @@ import java.util.Map;
     "max_score",
     "hits"
 })
-public class Hits_ {
+public class Hits {
 
     @JsonProperty("total")
-    private Integer total;
+    private Long total;
     @JsonProperty("max_score")
     private Double maxScore;
     @JsonProperty("hits")
@@ -34,7 +34,7 @@ public class Hits_ {
      *     The total
      */
     @JsonProperty("total")
-    public Integer getTotal() {
+    public Long getTotal() {
         return total;
     }
 
@@ -44,7 +44,7 @@ public class Hits_ {
      *     The total
      */
     @JsonProperty("total")
-    public void setTotal(Integer total) {
+    public void setTotal(Long total) {
         this.total = total;
     }
 

@@ -1,5 +1,5 @@
 
-package ee.ttu.thesis.model;
+package ee.ttu.thesis.model.stagemonitor;
 
 import org.codehaus.jackson.annotate.*;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -28,7 +28,7 @@ public class Hit {
     @JsonProperty("_score")
     private Double Score;
     @JsonProperty("_source")
-    private ee.ttu.thesis.model.Source Source;
+    private ee.ttu.thesis.model.stagemonitor.Source Source;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -118,7 +118,7 @@ public class Hit {
      *     The Source
      */
     @JsonProperty("_source")
-    public ee.ttu.thesis.model.Source getSource() {
+    public ee.ttu.thesis.model.stagemonitor.Source getSource() {
         return Source;
     }
 
@@ -128,7 +128,7 @@ public class Hit {
      *     The _source
      */
     @JsonProperty("_source")
-    public void setSource(ee.ttu.thesis.model.Source Source) {
+    public void setSource(ee.ttu.thesis.model.stagemonitor.Source Source) {
         this.Source = Source;
     }
 

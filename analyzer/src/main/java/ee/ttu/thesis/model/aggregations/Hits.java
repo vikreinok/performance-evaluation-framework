@@ -1,5 +1,5 @@
 
-package ee.ttu.thesis.model;
+package ee.ttu.thesis.model.aggregations;
 
 import org.codehaus.jackson.annotate.*;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -24,7 +24,7 @@ public class Hits {
     @JsonProperty("max_score")
     private Double maxScore;
     @JsonProperty("hits")
-    private List<Hit> hits = new ArrayList<Hit>();
+    private List<Object> hits = new ArrayList<Object>();
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -74,7 +74,7 @@ public class Hits {
      *     The hits
      */
     @JsonProperty("hits")
-    public List<Hit> getHits() {
+    public List<Object> getHits() {
         return hits;
     }
 
@@ -84,7 +84,7 @@ public class Hits {
      *     The hits
      */
     @JsonProperty("hits")
-    public void setHits(List<Hit> hits) {
+    public void setHits(List<Object> hits) {
         this.hits = hits;
     }
 

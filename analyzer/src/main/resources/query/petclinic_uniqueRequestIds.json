@@ -1,0 +1,11 @@
+{
+  "from": 0,
+  "size": 0,
+  "aggs": {
+    "group_by_request_id": {
+      "terms": {
+        "field": "headers.request-id"
+      }
+    }
+  }
+}

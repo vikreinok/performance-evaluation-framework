@@ -2,9 +2,11 @@ package ee.ttu.thesis;
 
 import com.sun.jersey.api.client.ClientResponse;
 import ee.ttu.thesis.client.RequestBuilder;
-import ee.ttu.thesis.model.Hit;
-import ee.ttu.thesis.model.Response;
-import ee.ttu.thesis.model.Source;
+import ee.ttu.thesis.model.aggregations.Aggregation;
+import ee.ttu.thesis.model.aggregations.Bucket;
+import ee.ttu.thesis.model.stagemonitor.Hit;
+import ee.ttu.thesis.model.stagemonitor.Response;
+import ee.ttu.thesis.model.stagemonitor.Source;
 import ee.ttu.thesis.processor.*;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -37,51 +39,83 @@ public class HttpQuery {
             String path = index + type + "/_search";
             String settingsPath = index + type + "/_search";
 
-            getSettings(rb, settingsPath);
-            putSettings(rb, settingsPath);
+//            getSettings(rb, settingsPath);
+//            putSettings(rb, settingsPath);
+
+            List<String> uniqueRequestIds = getUniqueRequestIds(rb, path);
 
 
-            String payload = getQuery("petclinic_generic.json");
-            ClientResponse clientResponse = rb.resource(path).post(ClientResponse.class, payload);
-            String content = getString(clientResponse.getEntityInputStream());
-            log(content);
+            for (String requestId : uniqueRequestIds) {
 
-            ObjectMapper om = new ObjectMapper();
-            Response response = om.readValue(content, Response.class);
+                log(String.format("Processing requests id %-10s...", requestId));
+                String query = getQuery("petclinic_generic.json");
+                query = query.replaceFirst("\"requestId\"", "\"" +  requestId + "\"");
+
+                ClientResponse clientResponse = rb.resource(path).post(ClientResponse.class, query);
+                String content = getString(clientResponse.getEntityInputStream());
+//                log(content);
+
+                ObjectMapper om = new ObjectMapper();
+                Response response = om.readValue(content, Response.class);
 
 
-            List<Source> data = new ArrayList<Source>();
-            if (response != null && response.getHits() != null) {
-                List<Hit> hits = response.getHits().getHits();
-                log(hits.size());
-                for (Hit hit : hits) {
-                    Source source = hit.getSource();
-                    data.add(source);
-
-//                    log(hit.getId());
-    //                parseResourcePaths(source.getCallStack());
-    //                log(source);
-//                    log(source.getHeaders().getRequestId());
-    //                log(source.getContainsCallTree());
-    //                log(source.getCallStack());
-    //                writeToFile(source.getId(), source.getCallStack());
-                }
+                processResponse(response);
             }
 
-            Analyzer analyzer = new Analyzer();
-            analyzer.addProcessor(new DbQueryCountProcessor());
-            analyzer.addProcessor(new DbExecutionTimeProcessor());
-            analyzer.addProcessor(new ExecutionTimeProcessor());
-            analyzer.addProcessor(new CallingContextTreeSizeProcessor());
-            analyzer.addProcessor(new CallingContextTreeDepthProcessor());
-            analyzer.process(data);
-
-//            log(response);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void processResponse(Response response) {
+        List<Source> data = new ArrayList<Source>();
+        if (response != null && response.getHits() != null) {
+            List<Hit> hits = response.getHits().getHits();
+            log(hits.size());
+            for (Hit hit : hits) {
+                Source source = hit.getSource();
+                data.add(source);
+
+//                    log(hit.getId());
+                //                parseResourcePaths(source.getCallStack());
+                //                log(source);
+//                    log(source.getHeaders().getRequestId());
+                //                log(source.getContainsCallTree());
+                //                log(source.getCallStack());
+                //                writeToFile(source.getId(), source.getCallStack());
+            }
+        }
+
+        Analyzer analyzer = new Analyzer();
+        analyzer.addProcessor(new DbQueryCountProcessor());
+        analyzer.addProcessor(new DbExecutionTimeProcessor());
+        analyzer.addProcessor(new ExecutionTimeProcessor());
+        analyzer.addProcessor(new CallingContextTreeSizeProcessor());
+        analyzer.addProcessor(new CallingContextTreeDepthProcessor());
+        analyzer.process(data);
+
+//            log(response);
+    }
+
+    private List<String> getUniqueRequestIds(RequestBuilder rb, String path) throws IOException {
+
+        String payload = getQuery("petclinic_uniqueRequestIds.json");
+        ClientResponse clientResponse = rb.resource(path).post(ClientResponse.class, payload);
+        String content = getString(clientResponse.getEntityInputStream());
+//        log(content);
+
+        ObjectMapper om = new ObjectMapper();
+        Aggregation response = om.readValue(content, Aggregation.class);
+
+        List<String> aggregations = new ArrayList<String>();
+
+        for (Bucket bucket : response.getAggregations().getGroupByRequestId().getBuckets()) {
+            aggregations.add(bucket.getKey());
+        }
+
+        return aggregations;
     }
 
     private void getSettings(RequestBuilder rb, String settingsPath) {
@@ -91,10 +125,11 @@ public class HttpQuery {
     }
 
     private void putSettings(RequestBuilder rb, String settingsPath) {
-//        String settingsPayload = getQuery("settings.json");
-//        ClientResponse settingsPutClientResponse = rb.resource(settingsPath).put(ClientResponse.class, settingsPayload);
-//        String settingsPutContent = getString(settingsPutClientResponse.getEntityInputStream());
-//        log(settingsPutContent);
+
+        String settingsPayload = getQuery("settings.json");
+        ClientResponse settingsPutClientResponse = rb.resource(settingsPath).put(ClientResponse.class, settingsPayload);
+        String settingsPutContent = getString(settingsPutClientResponse.getEntityInputStream());
+        log(settingsPutContent);
     }
 
     protected String getQuery(String name) {
@@ -134,9 +169,9 @@ public class HttpQuery {
             }
         }
         String query = sb != null ? sb.toString() : "";
-        log(String.format("<-------------------------------%-50s-------------------------------->", name));
-        log(query);
-        log(String.format("</------------------------------%-50s--------------------------------/>", name));
+//        log(String.format("<-------------------------------%-50s-------------------------------->", name));
+//        log(query);
+//        log(String.format("</------------------------------%-50s--------------------------------/>", name));
         return query;
     }
 

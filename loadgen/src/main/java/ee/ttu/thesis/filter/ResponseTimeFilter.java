@@ -39,7 +39,7 @@ public class ResponseTimeFilter extends ClientFilter {
     private String getRequestIdHeader(ClientRequest clientRequest) {
         String header = "";
         MultivaluedMap<String, Object> headers = clientRequest.getHeaders();
-        List<Object> headerValues = headers.get(RequestBuilder.HEADER_NAME_REQUEST_ID);
+        List<Object> headerValues = headers.get(RequestBuilder.HEADER_NAME_REQUEST_NAME);
         if (headerValues != null && headerValues.size() > 0) {
             header = (String)headerValues.get(0);
         }

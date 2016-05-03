@@ -1,5 +1,5 @@
 
-package ee.ttu.thesis.model;
+package ee.ttu.thesis.model.stagemonitor;
 
 import org.codehaus.jackson.annotate.JsonAnyGetter;
 import org.codehaus.jackson.annotate.JsonAnySetter;

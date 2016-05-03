@@ -1,6 +1,6 @@
 package ee.ttu.thesis.processor;
 
-import ee.ttu.thesis.model.Source;
+import ee.ttu.thesis.model.stagemonitor.Source;
 
 import java.util.List;
 

@@ -40,7 +40,7 @@ public class RequestInformation {
         this.periodNumber = formatPeriodNumber(periodNumber);
     }
 
-    public String buildRequestIdentifier(String requestId) {
+    public String buildRequestName(String requestId) {
         return String.format("%s_%s_%s", getThreadIdentifier(), requestId, getPeriodNumber());
     }
 

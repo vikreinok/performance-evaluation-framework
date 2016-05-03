@@ -1,5 +1,5 @@
 
-package ee.ttu.thesis.model;
+package ee.ttu.thesis.model.stagemonitor;
 
 import org.codehaus.jackson.annotate.*;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -23,7 +23,7 @@ public class Response {
     @JsonProperty("timed_out")
     private Boolean timedOut;
     @JsonProperty("_shards")
-    private ee.ttu.thesis.model.Shards Shards;
+    private ee.ttu.thesis.model.stagemonitor.Shards Shards;
     @JsonProperty("hits")
     private Hits hits;
     @JsonIgnore
@@ -75,7 +75,7 @@ public class Response {
      *     The Shards
      */
     @JsonProperty("_shards")
-    public ee.ttu.thesis.model.Shards getShards() {
+    public ee.ttu.thesis.model.stagemonitor.Shards getShards() {
         return Shards;
     }
 
@@ -85,7 +85,7 @@ public class Response {
      *     The _shards
      */
     @JsonProperty("_shards")
-    public void setShards(ee.ttu.thesis.model.Shards Shards) {
+    public void setShards(ee.ttu.thesis.model.stagemonitor.Shards Shards) {
         this.Shards = Shards;
     }
 

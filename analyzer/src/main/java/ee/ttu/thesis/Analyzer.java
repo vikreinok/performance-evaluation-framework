@@ -1,6 +1,6 @@
 package ee.ttu.thesis;
 
-import ee.ttu.thesis.model.Source;
+import ee.ttu.thesis.model.stagemonitor.Source;
 import ee.ttu.thesis.processor.Processor;
 
 import java.util.ArrayList;
