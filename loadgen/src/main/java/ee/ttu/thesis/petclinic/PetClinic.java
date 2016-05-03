@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class PetClinic {
 
     private static final int PARALLEL_THREADS = 1;
-    public static final int EXECUTION_COUNT = 25;
+    public static final int EXECUTION_COUNT = 50;
 
     private RequestInformation requestInformation;
 

@@ -5,6 +5,7 @@ import ee.ttu.thesis.client.RequestBuilder;
 import ee.ttu.thesis.model.Hit;
 import ee.ttu.thesis.model.Response;
 import ee.ttu.thesis.model.Source;
+import ee.ttu.thesis.processor.*;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -16,6 +17,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,7 +32,7 @@ public class HttpQuery {
         try {
             RequestBuilder rb = new RequestBuilder("");
 
-            String index = "stagemonitor-requests-2016.05.01";
+            String index = "stagemonitor-requests-2016.05.03";
             String type = "/requests";
             String path = index + type + "/_search";
             String settingsPath = index + type + "/_search";
@@ -47,20 +49,32 @@ public class HttpQuery {
             ObjectMapper om = new ObjectMapper();
             Response response = om.readValue(content, Response.class);
 
+
+            List<Source> data = new ArrayList<Source>();
             if (response != null && response.getHits() != null) {
                 List<Hit> hits = response.getHits().getHits();
                 log(hits.size());
                 for (Hit hit : hits) {
-                    log(hit.getId());
                     Source source = hit.getSource();
+                    data.add(source);
+
+//                    log(hit.getId());
     //                parseResourcePaths(source.getCallStack());
     //                log(source);
-                    log(source.getHeaders().getRequestId());
+//                    log(source.getHeaders().getRequestId());
     //                log(source.getContainsCallTree());
     //                log(source.getCallStack());
     //                writeToFile(source.getId(), source.getCallStack());
                 }
             }
+
+            Analyzer analyzer = new Analyzer();
+            analyzer.addProcessor(new DbQueryCountProcessor());
+            analyzer.addProcessor(new DbExecutionTimeProcessor());
+            analyzer.addProcessor(new ExecutionTimeProcessor());
+            analyzer.addProcessor(new CallingContextTreeSizeProcessor());
+            analyzer.addProcessor(new CallingContextTreeDepthProcessor());
+            analyzer.process(data);
 
 //            log(response);
 
