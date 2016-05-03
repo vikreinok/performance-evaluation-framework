@@ -17,22 +17,24 @@ public class DbExecutionTimeProcessor extends AbstractProcessor {
             Source current = index != size ? data.get(index) : null;
             Source previous = index > 0 ? data.get(index - 1) : current;
 
+            Long currentMetric = current.getExecutionTimeDb();
             if (previous != null) {
-                long diff = current.getExecutionTimeDb() - previous.getExecutionTimeDb();
+                Long previousMetric = previous.getExecutionTimeDb();
+                long diff = currentMetric - previousMetric;
                 diffSum += diff;
                 diffSqrtSum += Math.sqrt(Math.abs(diff));
             }
 
-            if (current.getExecutionTimeDb() > max) {
-                max = current.getExecutionTimeDb();
+            if (currentMetric > max) {
+                max = currentMetric;
             }
 
-            if (current.getExecutionTimeDb() < min) {
-                min = current.getExecutionTimeDb();
+            if (currentMetric < min) {
+                min = currentMetric;
             }
 
-            sum += current.getExecutionTimeDb();
-            values.add(Double.valueOf(current.getExecutionTimeDb()));
+            sum += currentMetric;
+            values.add(Double.valueOf(currentMetric));
 
             log();
         }

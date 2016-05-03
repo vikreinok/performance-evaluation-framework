@@ -17,22 +17,24 @@ public class DbQueryCountProcessor extends AbstractProcessor {
             Source current = index != size ? data.get(index) : null;
             Source previous = index > 0 ? data.get(index - 1) : current;
 
+            Long currentMetric = current.getExecutionCountDb();
             if (previous != null) {
-                long diff = current.getExecutionCountDb() - previous.getExecutionCountDb();
+                Long previousMetric = previous.getExecutionCountDb();
+                long diff = currentMetric - previousMetric;
                 diffSum += diff;
                 diffSqrtSum += Math.sqrt(Math.abs(diff));
             }
 
-            if (current.getExecutionCountDb() > max) {
-                max = current.getExecutionCountDb();
+            if (currentMetric > max) {
+                max = currentMetric;
             }
 
-            if (current.getExecutionCountDb() < min) {
-                min = current.getExecutionCountDb();
+            if (currentMetric < min) {
+                min = currentMetric;
             }
 
-            sum += current.getExecutionCountDb();
-            values.add(Double.valueOf(current.getExecutionCountDb()));
+            sum += currentMetric;
+            values.add(Double.valueOf(currentMetric));
 
             log();
         }

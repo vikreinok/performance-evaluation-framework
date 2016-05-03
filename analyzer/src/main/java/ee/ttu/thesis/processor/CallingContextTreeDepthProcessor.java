@@ -17,22 +17,25 @@ public class CallingContextTreeDepthProcessor extends AbstractProcessor {
             Source current = index != size ? data.get(index) : null;
             Source previous = index > 0 ? data.get(index - 1) : current;
 
+            long currentMetric = current.getCallStack().replaceAll("[^\n]", "").length();
+
             if (previous != null) {
-                long diff = current.getCallStack().replaceAll("[^\n]", "").length() - previous.getCallStack().replaceAll("[^\n]", "").length();
+                long previousMetric = previous.getCallStack().replaceAll("[^\n]", "").length();
+                long diff = currentMetric - previousMetric;
                 diffSum += diff;
                 diffSqrtSum += Math.sqrt(Math.abs(diff));
             }
 
-            if (current.getCallStack().replaceAll("[^\n]", "").length() > max) {
-                max = current.getCallStack().replaceAll("[^\n]", "").length();
+            if (currentMetric > max) {
+                max = currentMetric;
             }
 
-            if (current.getCallStack().replaceAll("[^\n]", "").length() < min) {
-                min = current.getCallStack().replaceAll("[^\n]", "").length();
+            if (currentMetric < min) {
+                min = currentMetric;
             }
 
-            sum += current.getCallStack().replaceAll("[^\n]", "").length();
-            values.add(Double.valueOf(current.getCallStack().replaceAll("[^\n]", "").length()));
+            sum += currentMetric;
+            values.add(Double.valueOf(currentMetric));
 
             log();
         }

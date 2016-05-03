@@ -17,22 +17,24 @@ public class CallingContextTreeSizeProcessor extends AbstractProcessor {
             Source current = index != size ? data.get(index) : null;
             Source previous = index > 0 ? data.get(index - 1) : current;
 
+            int currentMetric = current.getCallStack().length();
             if (previous != null) {
-                long diff = current.getCallStack().length() - previous.getCallStack().length();
+                int perviousMetric = previous.getCallStack().length();
+                long diff = currentMetric - perviousMetric;
                 diffSum += diff;
                 diffSqrtSum += Math.sqrt(Math.abs(diff));
             }
 
-            if (current.getCallStack().length() > max) {
-                max = current.getCallStack().length();
+            if (currentMetric > max) {
+                max = currentMetric;
             }
 
-            if (current.getCallStack().length() < min) {
-                min = current.getCallStack().length();
+            if (currentMetric < min) {
+                min = currentMetric;
             }
 
-            sum += current.getCallStack().length();
-            values.add(Double.valueOf(current.getCallStack().length()));
+            sum += currentMetric;
+            values.add(Double.valueOf(currentMetric));
 
             log();
         }

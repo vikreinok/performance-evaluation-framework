@@ -17,22 +17,24 @@ public class ExecutionTimeProcessor extends AbstractProcessor {
             Source current = index != size ? data.get(index) : null;
             Source previous = index > 0 ? data.get(index - 1) : current;
 
+            Long currentMetric = current.getExecutionTime();
             if (previous != null) {
-                long diff = current.getExecutionTime() - previous.getExecutionTime();
+                Long previousMetric = previous.getExecutionTime();
+                long diff = currentMetric - previousMetric;
                 diffSum += diff;
                 diffSqrtSum += Math.sqrt(Math.abs(diff));
             }
 
-            if (current.getExecutionTime() > max) {
-                max = current.getExecutionTime();
+            if (currentMetric > max) {
+                max = currentMetric;
             }
 
-            if (current.getExecutionTime() < min) {
-                min = current.getExecutionTime();
+            if (currentMetric < min) {
+                min = currentMetric;
             }
 
-            sum += current.getExecutionTime();
-            values.add(Double.valueOf(current.getExecutionTime()));
+            sum += currentMetric;
+            values.add(Double.valueOf(currentMetric));
 
             log();
         }

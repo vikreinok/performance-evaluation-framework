@@ -11,17 +11,20 @@ import java.util.Map;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "content-length",
-    "x-country",
-    "x-brand",
-    "host",
-    "content-type",
-    "connection",
-    "x-language",
-    "randomheader",
-    "accept",
-    "user-agent",
-    "request-id"
+        "content-length",
+        "x-country",
+        "x-brand",
+        "host",
+        "content-type",
+        "connection",
+        "x-language",
+        "randomheader",
+        "accept",
+        "user-agent",
+        "request-id",
+        "request-name",
+        "thread-id",
+        "period-number"
 })
 public class Headers {
 
@@ -47,13 +50,18 @@ public class Headers {
     private String userAgent;
     @JsonProperty("request-id")
     private String requestId;
+    @JsonProperty("request-name")
+    private String requestName;
+    @JsonProperty("thread-id")
+    private String threadId;
+    @JsonProperty("period-number")
+    private String periodNumber;
+
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
-     * 
-     * @return
-     *     The contentLength
+     * @return The contentLength
      */
     @JsonProperty("content-length")
     public String getContentLength() {
@@ -61,9 +69,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param contentLength
-     *     The content-length
+     * @param contentLength The content-length
      */
     @JsonProperty("content-length")
     public void setContentLength(String contentLength) {
@@ -71,9 +77,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The xCountry
+     * @return The xCountry
      */
     @JsonProperty("x-country")
     public String getXCountry() {
@@ -81,9 +85,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param xCountry
-     *     The x-country
+     * @param xCountry The x-country
      */
     @JsonProperty("x-country")
     public void setXCountry(String xCountry) {
@@ -91,9 +93,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The xBrand
+     * @return The xBrand
      */
     @JsonProperty("x-brand")
     public String getXBrand() {
@@ -101,9 +101,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param xBrand
-     *     The x-brand
+     * @param xBrand The x-brand
      */
     @JsonProperty("x-brand")
     public void setXBrand(String xBrand) {
@@ -111,9 +109,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The host
+     * @return The host
      */
     @JsonProperty("host")
     public String getHost() {
@@ -121,9 +117,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param host
-     *     The host
+     * @param host The host
      */
     @JsonProperty("host")
     public void setHost(String host) {
@@ -131,9 +125,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The contentType
+     * @return The contentType
      */
     @JsonProperty("content-type")
     public String getContentType() {
@@ -141,9 +133,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param contentType
-     *     The content-type
+     * @param contentType The content-type
      */
     @JsonProperty("content-type")
     public void setContentType(String contentType) {
@@ -151,9 +141,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The connection
+     * @return The connection
      */
     @JsonProperty("connection")
     public String getConnection() {
@@ -161,9 +149,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param connection
-     *     The connection
+     * @param connection The connection
      */
     @JsonProperty("connection")
     public void setConnection(String connection) {
@@ -171,9 +157,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The xLanguage
+     * @return The xLanguage
      */
     @JsonProperty("x-language")
     public String getXLanguage() {
@@ -181,9 +165,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param xLanguage
-     *     The x-language
+     * @param xLanguage The x-language
      */
     @JsonProperty("x-language")
     public void setXLanguage(String xLanguage) {
@@ -191,9 +173,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The randomheader
+     * @return The randomheader
      */
     @JsonProperty("randomheader")
     public String getRandomheader() {
@@ -201,9 +181,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param randomheader
-     *     The randomheader
+     * @param randomheader The randomheader
      */
     @JsonProperty("randomheader")
     public void setRandomheader(String randomheader) {
@@ -211,9 +189,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The accept
+     * @return The accept
      */
     @JsonProperty("accept")
     public String getAccept() {
@@ -221,9 +197,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param accept
-     *     The accept
+     * @param accept The accept
      */
     @JsonProperty("accept")
     public void setAccept(String accept) {
@@ -231,9 +205,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @return
-     *     The userAgent
+     * @return The userAgent
      */
     @JsonProperty("user-agent")
     public String getUserAgent() {
@@ -241,9 +213,7 @@ public class Headers {
     }
 
     /**
-     * 
-     * @param userAgent
-     *     The user-agent
+     * @param userAgent The user-agent
      */
     @JsonProperty("user-agent")
     public void setUserAgent(String userAgent) {
@@ -258,6 +228,36 @@ public class Headers {
     @JsonProperty("request-id")
     public void setRequestId(String requestId) {
         this.requestId = requestId;
+    }
+
+    @JsonProperty("request-name")
+    public String getRequestName() {
+        return requestName;
+    }
+
+    @JsonProperty("request-name")
+    public void setRequestName(String requestName) {
+        this.requestName = requestName;
+    }
+
+    @JsonProperty("thread-id")
+    public String getThreadId() {
+        return threadId;
+    }
+
+    @JsonProperty("thread-id")
+    public void setThreadId(String threadId) {
+        this.threadId = threadId;
+    }
+
+    @JsonProperty("period-number")
+    public String getPeriodNumber() {
+        return periodNumber;
+    }
+
+    @JsonProperty("period-number")
+    public void setPeriodNumber(String periodNumber) {
+        this.periodNumber = periodNumber;
     }
 
     @JsonAnyGetter

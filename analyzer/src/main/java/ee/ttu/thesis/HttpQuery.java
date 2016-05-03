@@ -36,68 +36,70 @@ public class HttpQuery {
 
             String index = "stagemonitor-requests-2016.05.03";
             String type = "/requests";
-            String path = index + type + "/_search";
-            String settingsPath = index + type + "/_search";
+            String searchPath = index + type + "/_search";
+            String settingsPath = index + type + "/_settings";
 
 //            getSettings(rb, settingsPath);
 //            putSettings(rb, settingsPath);
 
-            List<String> uniqueRequestIds = getUniqueRequestIds(rb, path);
+            List<String> uniqueRequestIds = getUniqueRequestIds(rb, searchPath);
 
 
             for (String requestId : uniqueRequestIds) {
+                List<Source> data = getResponseData(rb, searchPath, requestId);
 
-                log(String.format("Processing requests id %-10s...", requestId));
-                String query = getQuery("petclinic_generic.json");
-                query = query.replaceFirst("\"requestId\"", "\"" +  requestId + "\"");
+                if (data == null || data.size() == 0) {
+                    throw new IllegalStateException("Data is empty");
+                }
 
-                ClientResponse clientResponse = rb.resource(path).post(ClientResponse.class, query);
-                String content = getString(clientResponse.getEntityInputStream());
-//                log(content);
+                Analyzer analyzer = new Analyzer();
+                analyzer.addProcessor(
+                        new DbQueryCountProcessor(),
+                        new DbExecutionTimeProcessor(),
+                        new ExecutionTimeProcessor(),
+                        new CallingContextTreeSizeProcessor(),
+                        new CallingContextTreeDepthProcessor()
+                );
+                analyzer.process(data);
 
-                ObjectMapper om = new ObjectMapper();
-                Response response = om.readValue(content, Response.class);
-
-
-                processResponse(response);
+//            log(response);
             }
 
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    private void processResponse(Response response) {
+    private List<Source> getResponseData(RequestBuilder rb, String searchPath, String requestId) throws IOException {
+        String query = getQuery("petclinic_generic.json");
+        query = query.replaceFirst("\"requestId\"", "\"" + requestId + "\"");
+
+        ClientResponse clientResponse = rb.resource(searchPath).post(ClientResponse.class, query);
+        String content = getString(clientResponse.getEntityInputStream());
+        log(content);
+
+        ObjectMapper om = new ObjectMapper();
+        Response response = om.readValue(content, Response.class);
+
         List<Source> data = new ArrayList<Source>();
         if (response != null && response.getHits() != null) {
             List<Hit> hits = response.getHits().getHits();
-            log(hits.size());
+            log(String.format("Size of data %d", hits.size()));
             for (Hit hit : hits) {
                 Source source = hit.getSource();
                 data.add(source);
 
-//                    log(hit.getId());
-                //                parseResourcePaths(source.getCallStack());
-                //                log(source);
-//                    log(source.getHeaders().getRequestId());
-                //                log(source.getContainsCallTree());
-                //                log(source.getCallStack());
-                //                writeToFile(source.getId(), source.getCallStack());
+//                log(hit.getId());
+//                parseResourcePaths(source.getCallStack());
+//                log(source);
+//                writeToFile(source.getId(), source.getCallStack());
             }
         }
-
-        Analyzer analyzer = new Analyzer();
-        analyzer.addProcessor(new DbQueryCountProcessor());
-        analyzer.addProcessor(new DbExecutionTimeProcessor());
-        analyzer.addProcessor(new ExecutionTimeProcessor());
-        analyzer.addProcessor(new CallingContextTreeSizeProcessor());
-        analyzer.addProcessor(new CallingContextTreeDepthProcessor());
-        analyzer.process(data);
-
-//            log(response);
+        return data;
     }
+
 
     private List<String> getUniqueRequestIds(RequestBuilder rb, String path) throws IOException {
 
