@@ -49,7 +49,7 @@ public class ExecutionTimeProcessor extends AbstractProcessor {
     }
 
     @Override
-    String getMetricName() {
-        return "ExecutionTime";
+    ProcessorType getProcessorType() {
+        return ProcessorType.EXECUTION_TIME;
     }
 }

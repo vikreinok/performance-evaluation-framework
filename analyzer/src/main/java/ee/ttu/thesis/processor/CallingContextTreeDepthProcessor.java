@@ -50,7 +50,7 @@ public class CallingContextTreeDepthProcessor extends AbstractProcessor {
     }
 
     @Override
-    String getMetricName() {
-        return "CallingContextTreeDepth";
+    ProcessorType getProcessorType() {
+        return ProcessorType.CALLING_CONTEXT_TREE_DEPTH;
     }
 }

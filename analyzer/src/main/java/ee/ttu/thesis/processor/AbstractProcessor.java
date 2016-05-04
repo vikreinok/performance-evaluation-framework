@@ -1,5 +1,7 @@
 package ee.ttu.thesis.processor;
 
+import ee.ttu.thesis.model.processor.Result;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,10 +12,12 @@ public abstract class AbstractProcessor implements Processor {
     protected long sum = 0;
     protected long diffSum = 0;
     protected double diffSqrtSum = 0;
-     protected int size = 0;
+    protected int size = 0;
     protected long max = Long.MIN_VALUE;
     protected long min = Long.MAX_VALUE;
     protected List<Double> values = new ArrayList<Double>();
+
+    protected Result result = null;
 
     protected void log() {
 //        System.out.println(this.toString());
@@ -25,7 +29,7 @@ public abstract class AbstractProcessor implements Processor {
 
     abstract String getUnit();
 
-    abstract String getMetricName();
+    abstract ProcessorType getProcessorType();
 
     protected void analyzeMetric() {
         double average = (double) sum / size;
@@ -36,25 +40,17 @@ public abstract class AbstractProcessor implements Processor {
         double diffAverage = (double) diffSum / size;
         double squareRootAverage = diffSqrtSum / size;
         double standardDeviation = stdDev(values);
-        log(String.format("-----------%-30s-------------", getMetricName()));
-        log(String.format("%-20s %10.2f %s", "average", average, getUnit()));
-        log(String.format("%-20s %10.2f %s", "median", median, getUnit()));
-        log(String.format("%-20s %10.2f %s", "range", range, getUnit()));
-        log(String.format("%-20s %10.2f %s", "max", max, getUnit()));
-        log(String.format("%-20s %10.2f %s", "min", min, getUnit()));
-        log(String.format("%-20s %10.2f %s", "diffAverage", diffAverage, getUnit()));
-        log(String.format("%-20s %10.2f" , "squareRootAverage", squareRootAverage));
-        log(String.format("%-20s %10.2f", "standardDeviation", standardDeviation));
-        log(String.format("------------------------------------------------------"));
 
+        result = new Result(getProcessorType().name(), getUnit(), average, median, range, max, min, diffAverage, squareRootAverage, standardDeviation);
+//        result.print();
     }
 
     public double stdDev(List<Double> values) {
-        if(values == null || values.size() == 0)
+        if (values == null || values.size() == 0)
             return 0.0;
         double sum = 0;
         double sq_sum = 0;
-        for(int i = 0; i < values.size(); ++i) {
+        for (int i = 0; i < values.size(); ++i) {
             sum += values.get(i);
             sq_sum += values.get(i) * values.get(i);
         }
@@ -64,11 +60,11 @@ public abstract class AbstractProcessor implements Processor {
     }
 
     public double median(List<Double> values) {
-        int middle = values.size()/2;
-        if (values.size()%2 == 1) {
+        int middle = values.size() / 2;
+        if (values.size() % 2 == 1) {
             return values.get(middle);
         } else {
-            return (values.get(middle-1) + values.get(middle)) / 2.0;
+            return (values.get(middle - 1) + values.get(middle)) / 2.0;
         }
     }
 
@@ -85,5 +81,12 @@ public abstract class AbstractProcessor implements Processor {
         sb.append(", min=").append(min);
         sb.append('}');
         return sb.toString();
+    }
+
+    public Result getResult() {
+        if (result == null) {
+            throw new IllegalStateException("Method analyzeMetric not executed");
+        }
+        return result;
     }
 }

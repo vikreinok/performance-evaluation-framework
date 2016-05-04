@@ -49,7 +49,7 @@ public class CallingContextTreeSizeProcessor extends AbstractProcessor {
     }
 
     @Override
-    String getMetricName() {
-        return "CallingContextTreeSize";
+    ProcessorType getProcessorType() {
+        return ProcessorType.CALLING_CONTEXT_TREE_SIZE;
     }
 }

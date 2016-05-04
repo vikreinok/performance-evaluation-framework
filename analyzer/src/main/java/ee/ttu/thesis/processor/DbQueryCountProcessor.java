@@ -49,7 +49,7 @@ public class DbQueryCountProcessor extends AbstractProcessor {
     }
 
     @Override
-    String getMetricName() {
-        return "DbQueryCount";
+    ProcessorType getProcessorType() {
+        return ProcessorType.DB_QUERY_COUNT;
     }
 }

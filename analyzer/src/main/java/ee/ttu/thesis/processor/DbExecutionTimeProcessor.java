@@ -49,7 +49,7 @@ public class DbExecutionTimeProcessor extends AbstractProcessor {
     }
 
     @Override
-    String getMetricName() {
-        return "DbExecutionTime";
+    ProcessorType getProcessorType() {
+        return ProcessorType.DB_EXECUTION_TIME;
     }
 }

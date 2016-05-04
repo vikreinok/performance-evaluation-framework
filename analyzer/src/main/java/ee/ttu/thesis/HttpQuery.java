@@ -60,7 +60,7 @@ public class HttpQuery {
                         new CallingContextTreeSizeProcessor(),
                         new CallingContextTreeDepthProcessor()
                 );
-                analyzer.process(data);
+                analyzer.processMetrics(data);
 
 //            log(response);
             }
@@ -78,7 +78,7 @@ public class HttpQuery {
 
         ClientResponse clientResponse = rb.resource(searchPath).post(ClientResponse.class, query);
         String content = getString(clientResponse.getEntityInputStream());
-        log(content);
+//        log(content);
 
         ObjectMapper om = new ObjectMapper();
         Response response = om.readValue(content, Response.class);
@@ -86,7 +86,7 @@ public class HttpQuery {
         List<Source> data = new ArrayList<Source>();
         if (response != null && response.getHits() != null) {
             List<Hit> hits = response.getHits().getHits();
-            log(String.format("Size of data %d", hits.size()));
+//            log(String.format("Size of data %d", hits.size()));
             for (Hit hit : hits) {
                 Source source = hit.getSource();
                 data.add(source);
