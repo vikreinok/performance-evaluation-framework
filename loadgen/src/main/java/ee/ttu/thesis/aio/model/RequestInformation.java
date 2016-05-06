@@ -5,27 +5,27 @@ package ee.ttu.thesis.aio.model;
  */
 public class RequestInformation {
 
-    private String threadIdentifier = formatThreadIdentifier(0);
+    private String sessionId = formatSessionId(0);
     private String periodNumber = formatPeriodNumber(0);
 
-    public static String formatThreadIdentifier(int threadIdentifier) {
-        return String.format("%03d", threadIdentifier);
+    public static String formatSessionId(int sessionId) {
+        return String.format("%03d", sessionId);
     }
 
     public static String formatPeriodNumber(int periodNumber) {
         return String.format("%04d", periodNumber);
     }
 
-    public String getThreadIdentifier() {
-        return threadIdentifier;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setThreadIdentifier(String threadIdentifier) {
-        this.threadIdentifier = threadIdentifier;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public void setThreadIdentifier(int threadIdentifier) {
-        this.threadIdentifier = formatThreadIdentifier(threadIdentifier);
+    public void setSessionId(int sessionId) {
+        this.sessionId = formatSessionId(sessionId);
     }
 
     public String getPeriodNumber() {
@@ -41,7 +41,7 @@ public class RequestInformation {
     }
 
     public String buildRequestName(String requestId) {
-        return String.format("%s_%s_%s", getThreadIdentifier(), requestId, getPeriodNumber());
+        return String.format("%s_%s_%s", getSessionId(), requestId, getPeriodNumber());
     }
 
 }

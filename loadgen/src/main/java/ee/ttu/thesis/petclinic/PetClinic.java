@@ -41,9 +41,9 @@ public class PetClinic {
         for (int index = 0; index < PARALLEL_THREADS; index++) {
 
             String threadName = "PetClinicRequesterNr_" + index;
-            Integer threadIdentifier = index;
+            Integer sessionId = index;
 
-            threadPoolExecutor.execute(new PetClinicFlow(threadName, threadIdentifier));
+            threadPoolExecutor.execute(new PetClinicFlow(threadName, sessionId));
         }
         threadPoolExecutor.shutdown();
     }
@@ -89,12 +89,12 @@ public class PetClinic {
 class PetClinicFlow implements Runnable {
 
     private String threadName;
-    private Integer threadIdentifier;
+    private Integer sessionId;
 
-    public PetClinicFlow(String threadName, Integer threadIdentifier) {
+    public PetClinicFlow(String threadName, Integer sessionId) {
         this.threadName = threadName;
 
-        this.threadIdentifier = threadIdentifier;
+        this.sessionId = sessionId;
     }
 
     public void run() {
@@ -103,7 +103,7 @@ class PetClinicFlow implements Runnable {
         RequestInformation requestInformation = petClinic.getRequestInformation();
 
         requestInformation.setPeriodNumber(0);
-        requestInformation.setThreadIdentifier(threadIdentifier);
+        requestInformation.setSessionId(sessionId);
 
 
         try {

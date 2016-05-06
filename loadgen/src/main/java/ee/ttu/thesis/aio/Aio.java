@@ -34,8 +34,8 @@ import java.util.concurrent.TimeUnit;
 public class Aio  {
 
     public static final String CONTEXT_PATH = "loanengine/rest/";
-    public static final int EXECUTION_COUNT = 1000;
-    public static final int PARRALEL_THREADS = 2;
+    public static final int EXECUTION_COUNT = 50;
+    public static final int PARALLEL_THREADS = 1;
 
     protected RequestBuilder rb = null;
     protected DomainInformation domainInformation = null;
@@ -52,18 +52,18 @@ public class Aio  {
 
         ThreadPoolExecutor threadPoolExecutor =
                 new NamedThreadPoolExecutor(
-                        5,
+                        50,
                         100,
                         5000,
                         TimeUnit.MILLISECONDS,
                         "-AioRequestThreadPoolExecutor-"
                 );
-        for (int index = 0; index < PARRALEL_THREADS; index++) {
+        for (int index = 0; index < PARALLEL_THREADS; index++) {
 
             String threadName = "AioRequesterNr_" + index;
-            Integer threadIdentifier = index;
+            Integer sessionId = index;
 
-            threadPoolExecutor.execute(new AioFlow(threadName, threadIdentifier));
+            threadPoolExecutor.execute(new AioFlow(threadName, sessionId));
         }
         threadPoolExecutor.shutdown();
     }
@@ -486,11 +486,11 @@ public class Aio  {
 class AioFlow implements Runnable {
 
     private String name;
-    private int threadIdentifier;
+    private int sessionId;
 
-    public AioFlow(String name, Integer threadIdentifier) {
+    public AioFlow(String name, Integer sessionId) {
         this.name = name;
-        this.threadIdentifier = threadIdentifier;
+        this.sessionId = sessionId;
     }
 
     public void run() {
@@ -499,7 +499,7 @@ class AioFlow implements Runnable {
         RequestInformation requestInformation = aio.getRequestInformation();
 
         requestInformation.setPeriodNumber(0);
-        requestInformation.setThreadIdentifier(threadIdentifier);
+        requestInformation.setSessionId(sessionId);
 
         aio.registration();
 

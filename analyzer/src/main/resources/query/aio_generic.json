@@ -1,0 +1,31 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "application": "aio"
+          }
+        },
+        {
+          "match": {
+            "instance": "loanengine"
+          }
+        },
+        {
+          "match": {
+            "headers.request-id": "requestId"
+          }
+        },
+        {
+          "term": {
+            "containsCallTree": true
+          }
+        }
+      ]
+    }
+  },
+  "from": 0,
+  "size": 1000
+}
+

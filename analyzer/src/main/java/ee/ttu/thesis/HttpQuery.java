@@ -34,7 +34,7 @@ public class HttpQuery {
         try {
             RequestBuilder rb = new RequestBuilder("");
 
-            String index = "stagemonitor-requests-2016.05.03";
+            String index = "stagemonitor-requests-2016.05.06";
             String type = "/requests";
             String searchPath = index + type + "/_search";
             String settingsPath = index + type + "/_settings";
@@ -42,11 +42,11 @@ public class HttpQuery {
 //            getSettings(rb, settingsPath);
 //            putSettings(rb, settingsPath);
 
-            List<String> uniqueRequestIds = getUniqueRequestIds(rb, searchPath);
+            List<String> uniqueRequestIds = getUniqueRequestIds(rb, searchPath, "petclinic_uniqueRequestIds.json");
 
 
             for (String requestId : uniqueRequestIds) {
-                List<Source> data = getResponseData(rb, searchPath, requestId);
+                List<Source> data = getResponseData(rb, searchPath, "aio_generic.json", requestId);
 
                 if (data == null || data.size() == 0) {
                     throw new IllegalStateException("Data is empty");
@@ -72,8 +72,8 @@ public class HttpQuery {
 
     }
 
-    private List<Source> getResponseData(RequestBuilder rb, String searchPath, String requestId) throws IOException {
-        String query = getQuery("petclinic_generic.json");
+    private List<Source> getResponseData(RequestBuilder rb, String searchPath, String queryFileName, String requestId) throws IOException {
+        String query = getQuery(queryFileName);
         query = query.replaceFirst("\"requestId\"", "\"" + requestId + "\"");
 
         ClientResponse clientResponse = rb.resource(searchPath).post(ClientResponse.class, query);
@@ -101,9 +101,9 @@ public class HttpQuery {
     }
 
 
-    private List<String> getUniqueRequestIds(RequestBuilder rb, String path) throws IOException {
+    private List<String> getUniqueRequestIds(RequestBuilder rb, String path, String queryFileName) throws IOException {
 
-        String payload = getQuery("petclinic_uniqueRequestIds.json");
+        String payload = getQuery(queryFileName);
         ClientResponse clientResponse = rb.resource(path).post(ClientResponse.class, payload);
         String content = getString(clientResponse.getEntityInputStream());
 //        log(content);
@@ -112,6 +112,10 @@ public class HttpQuery {
         Aggregation response = om.readValue(content, Aggregation.class);
 
         List<String> aggregations = new ArrayList<String>();
+
+        if (response.getAggregations() == null) {
+            throw new IllegalStateException("No request-id headers are found. Please make sure you have metrics data set and correct index name.");
+        }
 
         for (Bucket bucket : response.getAggregations().getGroupByRequestId().getBuckets()) {
             aggregations.add(bucket.getKey());

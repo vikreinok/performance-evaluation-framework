@@ -52,8 +52,8 @@ public class Headers {
     private String requestId;
     @JsonProperty("request-name")
     private String requestName;
-    @JsonProperty("thread-id")
-    private String threadId;
+    @JsonProperty("session-id")
+    private String sessionId;
     @JsonProperty("period-number")
     private String periodNumber;
 
@@ -240,14 +240,14 @@ public class Headers {
         this.requestName = requestName;
     }
 
-    @JsonProperty("thread-id")
-    public String getThreadId() {
-        return threadId;
+    @JsonProperty("session-id")
+    public String getSessionId() {
+        return sessionId;
     }
 
-    @JsonProperty("thread-id")
-    public void setThreadId(String threadId) {
-        this.threadId = threadId;
+    @JsonProperty("session-id")
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     @JsonProperty("period-number")

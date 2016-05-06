@@ -16,7 +16,7 @@ import static ee.ttu.thesis.util.Logger.logErr;
  */
 public class Analyzer {
 
-    public static final double DIFF_AVERAGE_THRESHOLD = 0.01;
+    public static final double DIFF_AVERAGE_THRESHOLD = 0.1;
 
     protected Set<Processor> processors = new HashSet<Processor>();
 
@@ -34,11 +34,12 @@ public class Analyzer {
         for (Processor processor : processors) {
             Result result = processor.getResult();
 
+            // Strongest marker of a performance issue
             if (result.getDiffAverage() > DIFF_AVERAGE_THRESHOLD) {
-                logErr(String.format("Issue -> %-58s %s", result.getMetricName(), getHttpRequestInfo(data)));
+                logErr(String.format("Issue diffAverage-> %-30s value %9.2f %s", result.getMetricName(), result.getDiffAverage(), getHttpRequestInfo(data)));
             }
-        }
 
+        }
 
     }
 
@@ -57,11 +58,7 @@ public class Analyzer {
      */
     private String getHttpRequestInfo(List<Source> data) {
         Source firstSource = data.get(0);
-        return String.format("Request-id=%-6s %-4s %-80s",  firstSource.getHeaders().getRequestId(), firstSource.getMethod(), firstSource.getUrl());
+        return String.format("Request-id=%-6s %-4s %-80s", firstSource.getHeaders().getRequestId(), firstSource.getMethod(), firstSource.getUrl());
     }
-
-
-
-
 
 }

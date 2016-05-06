@@ -20,13 +20,13 @@ public class RequestBuilder {
 
     public static final String HEADER_NAME_REQUEST_NAME = "request-name";
     public static final String HEADER_NAME_REQUEST_ID = "request-id";
-    public static final String HEADER_NAME_THREAD_ID = "thread-id";
+    public static final String HEADER_NAME_SESSION_ID = "session-id";
     public static final String HEADER_NAME_PERIOD_NUMBER = "period-number";
     public final SetHeaderFilter DEFAULT_CONTENT_TYPE_HEADER = new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
     public SetHeaderFilter requestNameFilter = new SetHeaderFilter(HEADER_NAME_REQUEST_NAME, "");
     public SetHeaderFilter requestIdFilter = new SetHeaderFilter(HEADER_NAME_REQUEST_ID, "");
-    public SetHeaderFilter threadIdFilter = new SetHeaderFilter(HEADER_NAME_THREAD_ID, "");
+    public SetHeaderFilter sessionIdFilter = new SetHeaderFilter(HEADER_NAME_SESSION_ID, "");
     public SetHeaderFilter periodNumberFilter = new SetHeaderFilter(HEADER_NAME_PERIOD_NUMBER, "");
 
     protected String contextPath = "";
@@ -59,7 +59,7 @@ public class RequestBuilder {
     public WebResource resource(String path, String requestId, Object... values) {
         setRequestNameFilterValue(requestInformation.buildRequestName(requestId));
         setRequestIdFilterValue(requestId);
-        setThreadIdFilterValue(requestInformation.getThreadIdentifier());
+        setSessionIdFilterValue(requestInformation.getSessionId());
         setPeriodNumberFilterValue(requestInformation.getPeriodNumber());
         return resource(UriBuilder.fromPath(path).build(values).toString());
     }
@@ -121,12 +121,12 @@ public class RequestBuilder {
         getClient().addFilter(requestIdFilter);
     }
 
-    public void setThreadIdFilterValue(String threadId) {
-        if (getClient().isFilterPresent(threadIdFilter)) {
-            getClient().removeFilter(threadIdFilter);
+    public void setSessionIdFilterValue(String sessionId) {
+        if (getClient().isFilterPresent(sessionIdFilter)) {
+            getClient().removeFilter(sessionIdFilter);
         }
-        threadIdFilter = new SetHeaderFilter(HEADER_NAME_THREAD_ID, threadId);
-        getClient().addFilter(threadIdFilter);
+        sessionIdFilter = new SetHeaderFilter(HEADER_NAME_SESSION_ID, sessionId);
+        getClient().addFilter(sessionIdFilter);
     }
 
     public void setPeriodNumberFilterValue(String periodNumber) {
