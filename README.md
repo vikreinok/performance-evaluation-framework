@@ -3,13 +3,60 @@
 
 This README would normally document whatever steps are necessary to get your application up and running.
 
-### What is this repository for? ###
+## What is this repository for? ##
 
 * JAPEFFEA is a tool integatable to CI for analyzing performance issues
-* Version 0.2
+* Version 0.0.1
 
 
-### How do I get set up? ###
+## How do I get set up? ##
+
+Following dependencies are required:
+
+* JDK 7
+* Maven 3
+* Elasticsearch (Running locally. Accessible on port 9200) [ES 2.3 download](https://www.elastic.co/downloads/past-releases/elasticsearch-2-3-0)
+
+--------------------
+
+### Run example application [Perclinic ](https://bitbucket.org/viktor_reinok/petclinic) ###
+```
+#!command line (windows)
+
+mkdir petclinic
+cd petclinic
+git clone https://viktor_reinok@bitbucket.org/viktor_reinok/petclinic.git
+mvn clean tomcat7:run 
+```
+
+### Run load generator ###
+```
+#!command line (windows)
+cd..
+mkdir thesis
+cd thesis
+git https://viktor_reinok@bitbucket.org/viktor_reinok_thesis_team/thesis.git
+
+mvn -pl load-generator -am package assembly:single -DskipTests
+cd load-generator/target
+java -jar load-generator-jar-with-dependencies.jar
+
+```
+
+### Run data analyzer ###
+```
+cd..
+cd..
+#!command line (windows)
+mvn -pl analyzer -am package assembly:single -DskipTests
+cd analyzer/target
+java -jar analyzer-jar-with-dependencies.jar 
+ 
+```
+
+
+
+### TODO ###
 
 * Summary of set up
 * Configuration
