@@ -9,12 +9,9 @@ import ee.ttu.thesis.model.aggregations.Bucket_;
 import ee.ttu.thesis.model.stagemonitor.Hit;
 import ee.ttu.thesis.model.stagemonitor.Response;
 import ee.ttu.thesis.model.stagemonitor.Source;
-import ee.ttu.thesis.processor.*;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -33,62 +30,21 @@ import java.util.Map;
  */
 public class HttpQuery {
 
+    private RequestBuilder rb;
 
-    public void query() {
-
-        try {
-            RequestBuilder rb = new RequestBuilder("");
-
-            String currentDate = DateTimeFormat.forPattern("yyyy.MM.dd").print(LocalDateTime.now());
-            String index = "stagemonitor-requests-" + currentDate;
-//            String index = "stagemonitor-requests-2016.05.06";
-            final String type = "/requests";
-            final String searchPath = index + type + "/_search";
-            final String settingsPath = index + type + "/_settings";
-
-//            getSettings(rb, settingsPath);
-//            putSettings(rb, settingsPath);
-
-            Map<String, List<String>> uniqueModificationRequestIds = getModificationRequestIds(rb, searchPath, "petclinic_uniqueMoficationAndRequestIds.json");
-//            List<String> uniqueRequestIds = getModificationRequestIds(rb, searchPath, "petclinic_uniqueRequestIds.json");
-
-
-            for (String modificationId :uniqueModificationRequestIds.keySet()) {
-                log(String.format("-----------------------ModificationId %s-----------------------", modificationId));
-                for (String requestId : uniqueModificationRequestIds.get(modificationId)) {
-                    List<Source> data = getResponseData(rb, searchPath, "petclinic_generic.json", requestId, modificationId);
-
-                    if (data == null || data.size() == 0) {
-                        throw new IllegalStateException("Data is empty");
-                    }
-
-                    Analyzer analyzer = new Analyzer();
-                    analyzer.addProcessor(
-                            new DbQueryCountProcessor(),
-                            new DbExecutionTimeProcessor(),
-                            new ExecutionTimeProcessor(),
-                            new CallingContextTreeSizeProcessor(),
-                            new CallingContextTreeDepthProcessor()
-                    );
-                    analyzer.processMetrics(data);
-
-    //            log(response);
-                }
-            }
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
+    RequestBuilder getRequestBuilder() {
+        if (rb == null) {
+            rb = new RequestBuilder("");
         }
-
+        return rb;
     }
 
-    private List<Source> getResponseData(RequestBuilder rb, String searchPath, String queryFileName, String requestId, String modificationId) throws IOException {
+    public List<Source> getResponseData(String searchPath, String queryFileName, String requestId, String modificationId) throws IOException {
         String query = getQuery(queryFileName);
         query = query.replaceFirst("\"\\{requestId\\}\"", "\"" + requestId + "\"");
         query = query.replaceFirst("\"\\{modificationId\\}\"", "\"" + modificationId + "\"");
 
-        ClientResponse clientResponse = rb.resource(searchPath).post(ClientResponse.class, query);
+        ClientResponse clientResponse = getRequestBuilder().resource(searchPath).post(ClientResponse.class, query);
         String content = getString(clientResponse.getEntityInputStream());
 //        log(content);
 
@@ -115,10 +71,10 @@ public class HttpQuery {
         return data;
     }
 
-    private Map<String, List<String>> getModificationRequestIds(RequestBuilder rb, String path, String queryFileName) throws IOException {
+    public Map<String, List<String>> getModificationRequestIds(String path, String queryFileName) throws IOException {
 
         String payload = getQuery(queryFileName);
-        ClientResponse clientResponse = rb.resource(path).post(ClientResponse.class, payload);
+        ClientResponse clientResponse = getRequestBuilder().resource(path).post(ClientResponse.class, payload);
         String content = getString(clientResponse.getEntityInputStream());
 //        log(content);
 
@@ -144,16 +100,16 @@ public class HttpQuery {
         return aggregations;
     }
 
-    private void getSettings(RequestBuilder rb, String settingsPath) {
-        ClientResponse settingsGetClientResponse = rb.resource(settingsPath).get(ClientResponse.class);
+    private void getSettings(String settingsPath) {
+        ClientResponse settingsGetClientResponse = getRequestBuilder().resource(settingsPath).get(ClientResponse.class);
         String settingsGetContent = getString(settingsGetClientResponse.getEntityInputStream());
         log(settingsGetContent);
     }
 
-    private void putSettings(RequestBuilder rb, String settingsPath) {
+    private void putSettings(String settingsPath) {
 
         String settingsPayload = getQuery("settings.json");
-        ClientResponse settingsPutClientResponse = rb.resource(settingsPath).put(ClientResponse.class, settingsPayload);
+        ClientResponse settingsPutClientResponse = getRequestBuilder().resource(settingsPath).put(ClientResponse.class, settingsPayload);
         String settingsPutContent = getString(settingsPutClientResponse.getEntityInputStream());
         log(settingsPutContent);
     }

@@ -6,7 +6,7 @@
       "terms": {
         "field": "headers.modification-id",
         "size": 2,
-        "order" : { "_term" : "asc" }
+        "order" : { "_term" : "desc" }
       },
       "aggs": {
         "group_by_request_id": {

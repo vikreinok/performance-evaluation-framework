@@ -7,6 +7,7 @@ import static ee.ttu.thesis.util.Logger.log;
  */
 public class Result {
 
+    public static final double THRESHOLD_PERCENTAGE = 100;
     private String metricName;
     private String unit;
 
@@ -128,5 +129,36 @@ public class Result {
         log(String.format("%-20s %10.2f", "squareRootAverage", squareRootAverage));
         log(String.format("%-20s %10.2f", "standardDeviation", standardDeviation));
         log(String.format("------------------------------------------------------"));
+    }
+
+    public void compare(Result result) {
+
+        evaluate("average",this.average, result.getAverage());
+        evaluate("median",this.median, result.getMedian());
+        evaluate("range",this.range, result.getRange());
+        evaluate("max",this.max, result.getMax());
+        evaluate("min",this.min, result.getMin());
+        evaluate("diffAverage",this.diffAverage, result.getDiffAverage());
+        evaluate("squareRootAverage",this.squareRootAverage, result.getSquareRootAverage());
+        evaluate("standardDeviation",this.standardDeviation, result.getStandardDeviation());
+
+
+    }
+
+    protected static double changePercentage(double oldValue, double newValue) {
+        double diff = Math.abs(oldValue - newValue);
+        double percentage =  diff /oldValue;
+        if (Double.isInfinite(percentage)) {
+            return 0;
+        }
+        return percentage;
+    }
+
+    protected void evaluate(String attribute, double oldValue, double newValue) {
+        double percentage = changePercentage(oldValue, newValue);
+        percentage *= 100;
+        if (percentage > THRESHOLD_PERCENTAGE) {
+            System.out.println(String.format("Metric %-30s %-18s differed from last by %8.03f%%", this.metricName ,attribute, percentage));
+        }
     }
 }
