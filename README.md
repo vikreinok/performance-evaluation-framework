@@ -50,9 +50,43 @@ cd..
 cd..
 mvn -pl analyzer -am package assembly:single -DskipTests
 cd analyzer/target
-java -jar analyzer-jar-with-dependencies.jar 
+java -jar analyzer-jar-with-dependencies.jar 0000
  
 ```
+
+### Emulate the source code change and rerun Petclinic ###
+```
+#!command line (windows)
+stop existing Petclinic
+cd..
+cd..
+cd petclininc
+git checkout abc4b24337c8fce97aa557620b8ad8d7e047a49a -f
+mvn clean tomcat7:run
+```
+
+### Run again the load generator ###
+```
+#!command line (windows)
+cd..
+cd thesis
+mvn -pl load-generator -am package assembly:single -DskipTests
+cd load-generator/target
+java -jar load-generator-jar-with-dependencies.jar
+
+```
+
+### Run again the data analyzer ###
+```
+#!command line (windows)
+cd..
+cd..
+mvn -pl analyzer -am package assembly:single -DskipTests
+cd analyzer/target
+java -jar analyzer-jar-with-dependencies.jar
+```
+
+
 
 
 
