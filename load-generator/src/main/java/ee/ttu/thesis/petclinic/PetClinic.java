@@ -15,7 +15,7 @@ import static ee.ttu.thesis.util.Logger.logErr;
  */
 public class PetClinic extends AbstractLoadGenerator {
 
-    public static final int EXECUTION_COUNT = 50;
+    public static final int EXECUTION_COUNT = 100;
 
     public static void main(String[] args) {
         String modificationId = getFirstArgumentValue(args);

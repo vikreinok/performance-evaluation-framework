@@ -11,33 +11,56 @@ import java.util.Map;
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
-    "group_by_modification_id"
+    "key",
+    "doc_count"
 })
-public class Aggregations {
+public class Bucket_ {
 
-    @JsonProperty("group_by_modification_id")
-    private GroupByModificationId groupByModificationId;
+    @JsonProperty("key")
+    private String key;
+    @JsonProperty("doc_count")
+    private Long docCount;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
      * 
      * @return
-     *     The groupByModificationId
+     *     The key
      */
-    @JsonProperty("group_by_modification_id")
-    public GroupByModificationId getGroupByModificationId() {
-        return groupByModificationId;
+    @JsonProperty("key")
+    public String getKey() {
+        return key;
     }
 
     /**
      * 
-     * @param groupByModificationId
-     *     The group_by_modification_id
+     * @param key
+     *     The key
      */
-    @JsonProperty("group_by_modification_id")
-    public void setGroupByModificationId(GroupByModificationId groupByModificationId) {
-        this.groupByModificationId = groupByModificationId;
+    @JsonProperty("key")
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    /**
+     * 
+     * @return
+     *     The docCount
+     */
+    @JsonProperty("doc_count")
+    public Long getDocCount() {
+        return docCount;
+    }
+
+    /**
+     * 
+     * @param docCount
+     *     The doc_count
+     */
+    @JsonProperty("doc_count")
+    public void setDocCount(Long docCount) {
+        this.docCount = docCount;
     }
 
     @JsonAnyGetter

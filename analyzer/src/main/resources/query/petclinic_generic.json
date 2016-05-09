@@ -9,12 +9,12 @@
         },
         {
           "match": {
-            "instance": "localhost"
+            "headers.request-id": "{requestId}"
           }
         },
         {
           "match": {
-            "headers.request-id": "requestId"
+            "headers.modification-id": "{modificationId}"
           }
         },
         {

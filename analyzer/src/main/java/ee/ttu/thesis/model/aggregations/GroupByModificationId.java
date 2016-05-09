@@ -17,14 +17,14 @@ import java.util.Map;
     "sum_other_doc_count",
     "buckets"
 })
-public class GroupByRequestId {
+public class GroupByModificationId {
 
     @JsonProperty("doc_count_error_upper_bound")
     private Long docCountErrorUpperBound;
     @JsonProperty("sum_other_doc_count")
     private Long sumOtherDocCount;
     @JsonProperty("buckets")
-    private List<Bucket_> buckets = new ArrayList<Bucket_>();
+    private List<Bucket> buckets = new ArrayList<Bucket>();
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -74,7 +74,7 @@ public class GroupByRequestId {
      *     The buckets
      */
     @JsonProperty("buckets")
-    public List<Bucket_> getBuckets() {
+    public List<Bucket> getBuckets() {
         return buckets;
     }
 
@@ -84,7 +84,7 @@ public class GroupByRequestId {
      *     The buckets
      */
     @JsonProperty("buckets")
-    public void setBuckets(List<Bucket_> buckets) {
+    public void setBuckets(List<Bucket> buckets) {
         this.buckets = buckets;
     }
 

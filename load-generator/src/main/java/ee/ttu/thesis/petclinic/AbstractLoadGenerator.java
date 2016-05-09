@@ -52,7 +52,7 @@ public abstract class AbstractLoadGenerator {
 
     protected static String getFirstArgumentValue(String[] args) {
         String modificationId = MODIFICATION_ID;
-        if (args != null && args.length > 1) {
+        if (args != null && args.length > 0) {
             modificationId = args[0];
         }
         return modificationId;

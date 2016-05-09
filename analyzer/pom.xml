@@ -43,7 +43,7 @@
                         <archive>
                             <manifest>
                                 <addClasspath>true</addClasspath>
-                                <mainClass>ee.ttu.thesis.Main</mainClass>
+                                <mainClass>ee.ttu.thesis.PetClinic</mainClass>
                             </manifest>
                         </archive>
                         <descriptorRefs>
@@ -82,17 +82,10 @@
             <version>${project.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.7.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>${es.version}</version>
         </dependency>
 
         <dependency>

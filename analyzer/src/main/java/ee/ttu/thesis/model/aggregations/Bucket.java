@@ -12,7 +12,8 @@ import java.util.Map;
 @Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
     "key",
-    "doc_count"
+    "doc_count",
+    "group_by_request_id"
 })
 public class Bucket {
 
@@ -20,6 +21,8 @@ public class Bucket {
     private String key;
     @JsonProperty("doc_count")
     private Long docCount;
+    @JsonProperty("group_by_request_id")
+    private GroupByRequestId groupByRequestId;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -61,6 +64,26 @@ public class Bucket {
     @JsonProperty("doc_count")
     public void setDocCount(Long docCount) {
         this.docCount = docCount;
+    }
+
+    /**
+     * 
+     * @return
+     *     The groupByRequestId
+     */
+    @JsonProperty("group_by_request_id")
+    public GroupByRequestId getGroupByRequestId() {
+        return groupByRequestId;
+    }
+
+    /**
+     * 
+     * @param groupByRequestId
+     *     The group_by_request_id
+     */
+    @JsonProperty("group_by_request_id")
+    public void setGroupByRequestId(GroupByRequestId groupByRequestId) {
+        this.groupByRequestId = groupByRequestId;
     }
 
     @JsonAnyGetter

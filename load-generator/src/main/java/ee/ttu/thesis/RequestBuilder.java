@@ -63,6 +63,7 @@ public class RequestBuilder {
         setRequestIdFilterValue(requestId);
         setSessionIdFilterValue(requestInformation.getSessionId());
         setPeriodNumberFilterValue(requestInformation.getPeriodNumber());
+        setModificationIdFilterValue(requestInformation.getModificationId());
         return resource(UriBuilder.fromPath(path).build(values).toString());
     }
 

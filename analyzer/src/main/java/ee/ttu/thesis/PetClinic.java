@@ -3,7 +3,7 @@ package ee.ttu.thesis;
 /**
  *
  */
-public class Main {
+public class PetClinic {
 
 
     public static void main(String[] args) {

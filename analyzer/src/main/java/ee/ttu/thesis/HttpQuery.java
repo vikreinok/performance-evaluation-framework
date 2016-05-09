@@ -1,9 +1,11 @@
 package ee.ttu.thesis;
 
+
 import com.sun.jersey.api.client.ClientResponse;
 import ee.ttu.thesis.client.RequestBuilder;
 import ee.ttu.thesis.model.aggregations.Aggregation;
 import ee.ttu.thesis.model.aggregations.Bucket;
+import ee.ttu.thesis.model.aggregations.Bucket_;
 import ee.ttu.thesis.model.stagemonitor.Hit;
 import ee.ttu.thesis.model.stagemonitor.Response;
 import ee.ttu.thesis.model.stagemonitor.Source;
@@ -11,7 +13,8 @@ import ee.ttu.thesis.processor.*;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.elasticsearch.action.get.GetResponse;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -20,7 +23,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -34,35 +39,41 @@ public class HttpQuery {
         try {
             RequestBuilder rb = new RequestBuilder("");
 
-            String index = "stagemonitor-requests-2016.05.06";
-            String type = "/requests";
-            String searchPath = index + type + "/_search";
-            String settingsPath = index + type + "/_settings";
+            String currentDate = DateTimeFormat.forPattern("yyyy.MM.dd").print(LocalDateTime.now());
+            String index = "stagemonitor-requests-" + currentDate;
+//            String index = "stagemonitor-requests-2016.05.06";
+            final String type = "/requests";
+            final String searchPath = index + type + "/_search";
+            final String settingsPath = index + type + "/_settings";
 
 //            getSettings(rb, settingsPath);
 //            putSettings(rb, settingsPath);
 
-            List<String> uniqueRequestIds = getUniqueRequestIds(rb, searchPath, "petclinic_uniqueRequestIds.json");
+            Map<String, List<String>> uniqueModificationRequestIds = getModificationRequestIds(rb, searchPath, "petclinic_uniqueMoficationAndRequestIds.json");
+//            List<String> uniqueRequestIds = getModificationRequestIds(rb, searchPath, "petclinic_uniqueRequestIds.json");
 
 
-            for (String requestId : uniqueRequestIds) {
-                List<Source> data = getResponseData(rb, searchPath, "aio_generic.json", requestId);
+            for (String modificationId :uniqueModificationRequestIds.keySet()) {
+                log(String.format("-----------------------ModificationId %s-----------------------", modificationId));
+                for (String requestId : uniqueModificationRequestIds.get(modificationId)) {
+                    List<Source> data = getResponseData(rb, searchPath, "petclinic_generic.json", requestId, modificationId);
 
-                if (data == null || data.size() == 0) {
-                    throw new IllegalStateException("Data is empty");
+                    if (data == null || data.size() == 0) {
+                        throw new IllegalStateException("Data is empty");
+                    }
+
+                    Analyzer analyzer = new Analyzer();
+                    analyzer.addProcessor(
+                            new DbQueryCountProcessor(),
+                            new DbExecutionTimeProcessor(),
+                            new ExecutionTimeProcessor(),
+                            new CallingContextTreeSizeProcessor(),
+                            new CallingContextTreeDepthProcessor()
+                    );
+                    analyzer.processMetrics(data);
+
+    //            log(response);
                 }
-
-                Analyzer analyzer = new Analyzer();
-                analyzer.addProcessor(
-                        new DbQueryCountProcessor(),
-                        new DbExecutionTimeProcessor(),
-                        new ExecutionTimeProcessor(),
-                        new CallingContextTreeSizeProcessor(),
-                        new CallingContextTreeDepthProcessor()
-                );
-                analyzer.processMetrics(data);
-
-//            log(response);
             }
 
 
@@ -72,15 +83,19 @@ public class HttpQuery {
 
     }
 
-    private List<Source> getResponseData(RequestBuilder rb, String searchPath, String queryFileName, String requestId) throws IOException {
+    private List<Source> getResponseData(RequestBuilder rb, String searchPath, String queryFileName, String requestId, String modificationId) throws IOException {
         String query = getQuery(queryFileName);
-        query = query.replaceFirst("\"requestId\"", "\"" + requestId + "\"");
+        query = query.replaceFirst("\"\\{requestId\\}\"", "\"" + requestId + "\"");
+        query = query.replaceFirst("\"\\{modificationId\\}\"", "\"" + modificationId + "\"");
 
         ClientResponse clientResponse = rb.resource(searchPath).post(ClientResponse.class, query);
         String content = getString(clientResponse.getEntityInputStream());
 //        log(content);
 
         ObjectMapper om = new ObjectMapper();
+
+
+
         Response response = om.readValue(content, Response.class);
 
         List<Source> data = new ArrayList<Source>();
@@ -100,8 +115,7 @@ public class HttpQuery {
         return data;
     }
 
-
-    private List<String> getUniqueRequestIds(RequestBuilder rb, String path, String queryFileName) throws IOException {
+    private Map<String, List<String>> getModificationRequestIds(RequestBuilder rb, String path, String queryFileName) throws IOException {
 
         String payload = getQuery(queryFileName);
         ClientResponse clientResponse = rb.resource(path).post(ClientResponse.class, payload);
@@ -109,16 +123,22 @@ public class HttpQuery {
 //        log(content);
 
         ObjectMapper om = new ObjectMapper();
+
         Aggregation response = om.readValue(content, Aggregation.class);
 
-        List<String> aggregations = new ArrayList<String>();
+        // Have to preserve order of modification ids
+        Map<String, List<String>> aggregations = new LinkedHashMap<String, List<String>>();
 
         if (response.getAggregations() == null) {
             throw new IllegalStateException("No request-id headers are found. Please make sure you have metrics data set and correct index name.");
         }
 
-        for (Bucket bucket : response.getAggregations().getGroupByRequestId().getBuckets()) {
-            aggregations.add(bucket.getKey());
+        for (Bucket modificationId : response.getAggregations().getGroupByModificationId().getBuckets()) {
+            List<String> requestIds = new ArrayList<String>();
+            for (Bucket_ requestId : modificationId.getGroupByRequestId().getBuckets()) {
+                requestIds.add(requestId.getKey());
+            }
+            aggregations.put(modificationId.getKey(), requestIds);
         }
 
         return aggregations;
@@ -250,9 +270,5 @@ public class HttpQuery {
 
     private void log(Object obj) {
         System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
-    }
-
-    private void log(GetResponse getResponse) {
-        System.out.println(getResponse.getSourceAsString());
     }
 }

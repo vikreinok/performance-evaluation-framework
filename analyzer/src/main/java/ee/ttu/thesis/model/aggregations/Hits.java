@@ -22,7 +22,7 @@ public class Hits {
     @JsonProperty("total")
     private Long total;
     @JsonProperty("max_score")
-    private Double maxScore;
+    private Long maxScore;
     @JsonProperty("hits")
     private List<Object> hits = new ArrayList<Object>();
     @JsonIgnore
@@ -54,7 +54,7 @@ public class Hits {
      *     The maxScore
      */
     @JsonProperty("max_score")
-    public Double getMaxScore() {
+    public Long getMaxScore() {
         return maxScore;
     }
 
@@ -64,7 +64,7 @@ public class Hits {
      *     The max_score
      */
     @JsonProperty("max_score")
-    public void setMaxScore(Double maxScore) {
+    public void setMaxScore(Long maxScore) {
         this.maxScore = maxScore;
     }
 
