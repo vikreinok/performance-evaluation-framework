@@ -19,7 +19,7 @@ Following dependencies are required:
 
 --------------------
 
-### Run example application [Perclinic ](https://bitbucket.org/viktor_reinok/petclinic) ###
+### Run an example application [Perclinic ](https://bitbucket.org/viktor_reinok/petclinic) ###
 ```
 #!command line (windows)
 
@@ -29,13 +29,13 @@ git clone https://viktor_reinok@bitbucket.org/viktor_reinok/petclinic.git
 mvn clean tomcat7:run 
 ```
 
-### Run load generator ###
+### Run the load generator ###
 ```
 #!command line (windows)
 cd..
 mkdir thesis
 cd thesis
-git https://viktor_reinok@bitbucket.org/viktor_reinok_thesis_team/thesis.git
+git clone https://viktor_reinok@bitbucket.org/viktor_reinok_thesis_team/thesis.git
 
 mvn -pl load-generator -am package assembly:single -DskipTests
 cd load-generator/target
@@ -43,11 +43,11 @@ java -jar load-generator-jar-with-dependencies.jar
 
 ```
 
-### Run data analyzer ###
+### Run the data analyzer ###
 ```
-cd..
-cd..
 #!command line (windows)
+cd..
+cd..
 mvn -pl analyzer -am package assembly:single -DskipTests
 cd analyzer/target
 java -jar analyzer-jar-with-dependencies.jar 
