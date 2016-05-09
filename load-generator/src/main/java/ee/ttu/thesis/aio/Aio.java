@@ -13,11 +13,11 @@ import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.api.client.UniformInterfaceException;
-import ee.ttu.thesis.NamedThreadPoolExecutor;
 import ee.ttu.thesis.RequestBuilder;
 import ee.ttu.thesis.aio.genrator.GeneratorUtil;
 import ee.ttu.thesis.aio.model.DomainInformation;
 import ee.ttu.thesis.aio.model.RequestInformation;
+import ee.ttu.thesis.petclinic.AbstractLoadGenerator;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -25,47 +25,29 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
  */
-public class Aio  {
+public class Aio extends AbstractLoadGenerator {
 
     public static final String CONTEXT_PATH = "loanengine/rest/";
     public static final int EXECUTION_COUNT = 50;
-    public static final int PARALLEL_THREADS = 1;
 
-    protected RequestBuilder rb = null;
     protected DomainInformation domainInformation = null;
-    protected RequestInformation requestInformation = new RequestInformation();
-
-    public Aio() {
-    }
 
     public static void main(String[] args) {
-        Aio.start();
+        new Aio().start(null);
     }
 
-    public static void start() {
+    public static void logToConsole(Object obj) {
+//        System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
+    }
 
-        ThreadPoolExecutor threadPoolExecutor =
-                new NamedThreadPoolExecutor(
-                        50,
-                        100,
-                        5000,
-                        TimeUnit.MILLISECONDS,
-                        "-AioRequestThreadPoolExecutor-"
-                );
-        for (int index = 0; index < PARALLEL_THREADS; index++) {
-
-            String threadName = "AioRequesterNr_" + index;
-            Integer sessionId = index;
-
-            threadPoolExecutor.execute(new AioFlow(threadName, sessionId));
-        }
-        threadPoolExecutor.shutdown();
+    @Override
+    protected Runnable getCustomerFlow(String modificationId, Integer sessionId) {
+        // Modification id no implemented because it is out of scope to fix huge applications
+        return new AioFlow(sessionId);
     }
 
     public void registration() {
@@ -80,16 +62,6 @@ public class Aio  {
         afterApplicationSubmit();
         acceptCases(2);
 
-
-//        String contractId = openSS();
-////        changeDueDateInSS();
-//        clickOnAccountStatemetn(contractId);
-//        drawSS(contractId);
-//        acceptCases(1);
-//        clickOnInvoicesAndContracts(contractId);
-//        generateInvoice();
-////        processLateInvoice(invoiceId);
-//        allocate(10000);
         logout();
 
         domainInformation.print();
@@ -164,7 +136,8 @@ public class Aio  {
 
     private void clickOnInvoicesAndContracts(String contractId) {
 
-        Collection<InvoiceDTO> invoiceDTOs = rb.resource(String.format("contracts/%s/invoices", contractId), "01010").get(new GenericType<Collection<InvoiceDTO>>() {});
+        Collection<InvoiceDTO> invoiceDTOs = rb.resource(String.format("contracts/%s/invoices", contractId), "01010").get(new GenericType<Collection<InvoiceDTO>>() {
+        });
         ClientResponse clientResponse = rb.resource(String.format("contracts/%s/document", contractId), "01020").get(ClientResponse.class);
 
         logToConsole(invoiceDTOs);
@@ -181,8 +154,10 @@ public class Aio  {
         rb.resource(String.format("contracts/%s/draw", contractId), "00910").put(new DrawDTO(4000)); //  204
         ContractDTO contractDTO = rb.resource(String.format("contracts/%s", contractId), "00920").get(ContractDTO.class);
         AccountStatementDTO accountStatementDTO = rb.resource(String.format("contracts/%s/account-statement", contractId), "00930").queryParam("from", "2016-01-07").get(AccountStatementDTO.class);
-        Collection<ProductWithExtraServicesDTO> clProductsProductWithExtraServicesDTOs = rb.resource("products/CREDIT_LINE", "00940").get(new GenericType<Collection<ProductWithExtraServicesDTO>>() {});
-        Map<ExtraService, ContractExtraServiceDTO> extraServices = rb.resource(String.format("contracts/%s/extra-services", contractId), "00950").get(new GenericType<Map<ExtraService, ContractExtraServiceDTO>>() {});
+        Collection<ProductWithExtraServicesDTO> clProductsProductWithExtraServicesDTOs = rb.resource("products/CREDIT_LINE", "00940").get(new GenericType<Collection<ProductWithExtraServicesDTO>>() {
+        });
+        Map<ExtraService, ContractExtraServiceDTO> extraServices = rb.resource(String.format("contracts/%s/extra-services", contractId), "00950").get(new GenericType<Map<ExtraService, ContractExtraServiceDTO>>() {
+        });
 
         logToConsole(contractDTO);
         logToConsole(accountStatementDTO);
@@ -221,11 +196,15 @@ public class Aio  {
             e.printStackTrace();
         }
 
-        Collection<LoanIssuerDTO> loanIssuerDTOs = rb.resource("credit-application/loanissuers", "00740").get(new GenericType<Collection<LoanIssuerDTO>>() {});
+        Collection<LoanIssuerDTO> loanIssuerDTOs = rb.resource("credit-application/loanissuers", "00740").get(new GenericType<Collection<LoanIssuerDTO>>() {
+        });
         Integer outstandingAmount = rb.resource(String.format("contracts/%s/invoices/outstanding", contractId), "00750").get(Integer.class); // 0
-        Map<ExtraService, ContractExtraServiceDTO> extraServices = rb.resource(String.format("contracts/%s/extra-services", contractId), "00760").get(new GenericType<Map<ExtraService, ContractExtraServiceDTO>>() {});
-        List<DrawSelectionsDTO> drawSelectionsDTOs = rb.resource(String.format("contracts/%s/draw-selections", contractId), "00770").get(new GenericType<List<DrawSelectionsDTO>>() {}); // arrays of json objects
-        Collection<ProductWithExtraServicesDTO> clProductsProductWithExtraServicesDTOs = rb.resource("products/CREDIT_LINE", "00780").get(new GenericType<Collection<ProductWithExtraServicesDTO>>() {});
+        Map<ExtraService, ContractExtraServiceDTO> extraServices = rb.resource(String.format("contracts/%s/extra-services", contractId), "00760").get(new GenericType<Map<ExtraService, ContractExtraServiceDTO>>() {
+        });
+        List<DrawSelectionsDTO> drawSelectionsDTOs = rb.resource(String.format("contracts/%s/draw-selections", contractId), "00770").get(new GenericType<List<DrawSelectionsDTO>>() {
+        }); // arrays of json objects
+        Collection<ProductWithExtraServicesDTO> clProductsProductWithExtraServicesDTOs = rb.resource("products/CREDIT_LINE", "00780").get(new GenericType<Collection<ProductWithExtraServicesDTO>>() {
+        });
 
         domainInformation.setCustomerId(Long.valueOf(authenticationInfoDTO.customer.id));
         domainInformation.setMsisdn(authenticationInfoDTO.customer.msisdn);
@@ -286,7 +265,7 @@ public class Aio  {
     private void acceptCases(int nrOfCalls) {
         // dev resource accept cases
         for (int count = 0; count < nrOfCalls; count++) {
-            rb.resource("developer/cases", "100"+ + nrOfCalls + count).post(); // 204 no content
+            rb.resource("developer/cases", "100" + +nrOfCalls + count).post(); // 204 no content
         }
     }
 
@@ -330,11 +309,15 @@ public class Aio  {
         CreditApplicationDTO creditApplicationDTO = rb.resource("credit-application", "00410").get(CreditApplicationDTO.class);
 
 
-        Map<Long, Collection<DrawSelectionsDTO>> drawSections = rb.resource("products/draw-selections", "00420").get(new GenericType<Map<Long, Collection<DrawSelectionsDTO>>>() {});  // 200  draw sections
-        Map<Long, Collection<DrawSelectionsDTO>> drawSectionsWithMaturity = rb.resource("products/draw-selections-with-maturity", "00430").queryParam("maturityPeriod", "36").get(new GenericType<Map<Long, Collection<DrawSelectionsDTO>>>() {});  // 200  draw sections
+        Map<Long, Collection<DrawSelectionsDTO>> drawSections = rb.resource("products/draw-selections", "00420").get(new GenericType<Map<Long, Collection<DrawSelectionsDTO>>>() {
+        });  // 200  draw sections
+        Map<Long, Collection<DrawSelectionsDTO>> drawSectionsWithMaturity = rb.resource("products/draw-selections-with-maturity", "00430").queryParam("maturityPeriod", "36").get(new GenericType<Map<Long, Collection<DrawSelectionsDTO>>>() {
+        });  // 200  draw sections
 
-        Collection<ProductAvailableDTO> installmentProducts = rb.resource("credit-application/product/availability/INSTALLMENT", "00440").get(new GenericType<Collection<ProductAvailableDTO>>() {});  // 200   alot of product as a response
-        Collection<ProductAvailableDTO> creditLineProducts = rb.resource("credit-application/product/availability/CREDIT_LINE", "00450").get(new GenericType<Collection<ProductAvailableDTO>>() {});  // 200   alot of product as a response
+        Collection<ProductAvailableDTO> installmentProducts = rb.resource("credit-application/product/availability/INSTALLMENT", "00440").get(new GenericType<Collection<ProductAvailableDTO>>() {
+        });  // 200   alot of product as a response
+        Collection<ProductAvailableDTO> creditLineProducts = rb.resource("credit-application/product/availability/CREDIT_LINE", "00450").get(new GenericType<Collection<ProductAvailableDTO>>() {
+        });  // 200   alot of product as a response
 
 
         logToConsole(creditApplicationDTO);
@@ -422,8 +405,10 @@ public class Aio  {
             e.printStackTrace();
         }
         CreditApplicationDTO creditApplicationPutDTO = rb.resource("credit-application", "00230").put(CreditApplicationDTO.class, new NewApplicationDTO());
-        Collection<LoanIssuerDTO> loanIssuerDTOs = rb.resource("credit-application/loanissuers", "00240").get(new GenericType<Collection<LoanIssuerDTO>>() {});
-        Collection<PostOfficeDTO> postOfficeDTOs = rb.resource("authentication/ee/postoffices", "00250").get(new GenericType<Collection<PostOfficeDTO>>() {});
+        Collection<LoanIssuerDTO> loanIssuerDTOs = rb.resource("credit-application/loanissuers", "00240").get(new GenericType<Collection<LoanIssuerDTO>>() {
+        });
+        Collection<PostOfficeDTO> postOfficeDTOs = rb.resource("authentication/ee/postoffices", "00250").get(new GenericType<Collection<PostOfficeDTO>>() {
+        });
         try {
             rb.resource("credit-application/previous", "00260").get(CreditApplicationDTO.class); // 404
         } catch (UniformInterfaceException e) {
@@ -473,10 +458,6 @@ public class Aio  {
 //        logToConsole(response);
     }
 
-    public static void logToConsole(Object obj) {
-//        System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
-    }
-
     public RequestInformation getRequestInformation() {
         return requestInformation;
     }
@@ -485,11 +466,9 @@ public class Aio  {
 
 class AioFlow implements Runnable {
 
-    private String name;
     private int sessionId;
 
-    public AioFlow(String name, Integer sessionId) {
-        this.name = name;
+    public AioFlow(Integer sessionId) {
         this.sessionId = sessionId;
     }
 
