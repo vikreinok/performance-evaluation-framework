@@ -19,8 +19,9 @@
     </developers>
 
     <modules>
+        <module>commons</module>
         <module>profiling-agent</module>
-        <module>loadgen</module>
+        <module>load-generator</module>
         <module>analyzer</module>
     </modules>
 
@@ -33,20 +34,36 @@
         <jersey.version>1.19</jersey.version>
     </properties>
 
-    <!--<pluginManagement>-->
-        <!--<plugins>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-release-plugin</artifactId>-->
-                <!--<version>2.4.1</version>-->
-                <!--<configuration>-->
-                    <!--<tagNameFormat>rel-@{version}</tagNameFormat>-->
-                    <!--<autoVersionSubmodules>true</autoVersionSubmodules>-->
-                    <!--<goals/>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-        <!--</plugins>-->
-    <!--</pluginManagement>-->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.6</version>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <archive>
+                            <manifest>
+                                <mainClass>ee.ttu.thesis.petclinic.Petclinic</mainClass>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                </plugin>
+            </plugins>
+
+        </pluginManagement>
+    </build>
 
     <dependencyManagement>
         <dependencies>

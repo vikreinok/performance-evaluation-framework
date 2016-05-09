@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>load-generator</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
 
     <properties>
@@ -38,15 +38,39 @@
                 </plugin>
 
                 <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addClasspath>true</addClasspath>
+                                <mainClass>ee.ttu.thesis.petclinic.PetClinic</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                            <phase>package</phase> <!-- bind to the packaging phase -->
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.5.1</version>
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
-                        <!-- NOTE: IDEA maven import doesn't seem to import the proc:none option properly. For project res to work under IDEA, add the -proc:none compiler option
-                            manually in Preferences -> Compiler -> Java Compiler Also, in case of internal compiler errors, switch to use another compiler, e.g. the "Javac in-process" one might work better. -->
-                        <proc>none</proc>
-                        <!-- <compilerArgument>-proc:none</compilerArgument> -->
+                        <excludes>
+                            <exclude>ee/ttu/thesis/aio/Aio.java</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
             </plugins>
@@ -65,6 +89,7 @@
             <artifactId>joda-time</artifactId>
             <version>2.1</version>
         </dependency>
+
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>

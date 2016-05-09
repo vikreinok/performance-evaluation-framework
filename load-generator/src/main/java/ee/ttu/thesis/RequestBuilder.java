@@ -22,12 +22,14 @@ public class RequestBuilder {
     public static final String HEADER_NAME_REQUEST_ID = "request-id";
     public static final String HEADER_NAME_SESSION_ID = "session-id";
     public static final String HEADER_NAME_PERIOD_NUMBER = "period-number";
+    public static final String HEADER_NAME_MODIFICATION_ID = "modification-id";
     public final SetHeaderFilter DEFAULT_CONTENT_TYPE_HEADER = new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
     public SetHeaderFilter requestNameFilter = new SetHeaderFilter(HEADER_NAME_REQUEST_NAME, "");
     public SetHeaderFilter requestIdFilter = new SetHeaderFilter(HEADER_NAME_REQUEST_ID, "");
     public SetHeaderFilter sessionIdFilter = new SetHeaderFilter(HEADER_NAME_SESSION_ID, "");
     public SetHeaderFilter periodNumberFilter = new SetHeaderFilter(HEADER_NAME_PERIOD_NUMBER, "");
+    public SetHeaderFilter modificationIdFilter = new SetHeaderFilter(HEADER_NAME_MODIFICATION_ID, "");
 
     protected String contextPath = "";
     protected Client client;
@@ -135,6 +137,15 @@ public class RequestBuilder {
         }
         periodNumberFilter = new SetHeaderFilter(HEADER_NAME_PERIOD_NUMBER, periodNumber);
         getClient().addFilter(periodNumberFilter);
+
+    }
+
+    public void setModificationIdFilterValue(String modificationId) {
+        if (getClient().isFilterPresent(modificationIdFilter)) {
+            getClient().removeFilter(modificationIdFilter);
+        }
+        modificationIdFilter = new SetHeaderFilter(HEADER_NAME_MODIFICATION_ID, modificationId);
+        getClient().addFilter(modificationIdFilter);
 
     }
 

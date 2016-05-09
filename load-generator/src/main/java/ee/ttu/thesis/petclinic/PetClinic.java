@@ -1,5 +1,6 @@
 package ee.ttu.thesis.petclinic;
 
+import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import ee.ttu.thesis.NamedThreadPoolExecutor;
 import ee.ttu.thesis.RequestBuilder;
@@ -10,13 +11,17 @@ import javax.ws.rs.core.MediaType;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static ee.ttu.thesis.util.Logger.logErr;
+
 /**
  *
  */
 public class PetClinic {
 
-    private static final int PARALLEL_THREADS = 1;
     public static final int EXECUTION_COUNT = 50;
+    public static final String MODIFICATION_ID = "0000";
+
+    private static final int PARALLEL_THREADS = 1;
 
     private RequestInformation requestInformation;
 
@@ -43,7 +48,7 @@ public class PetClinic {
             String threadName = "PetClinicRequesterNr_" + index;
             Integer sessionId = index;
 
-            threadPoolExecutor.execute(new PetClinicFlow(threadName, sessionId));
+            threadPoolExecutor.execute(new PetClinicFlow(MODIFICATION_ID, threadName, sessionId));
         }
         threadPoolExecutor.shutdown();
     }
@@ -88,12 +93,13 @@ public class PetClinic {
 
 class PetClinicFlow implements Runnable {
 
+    private String modificationId;
     private String threadName;
     private Integer sessionId;
 
-    public PetClinicFlow(String threadName, Integer sessionId) {
+    public PetClinicFlow(String modificationId, String threadName, Integer sessionId) {
+        this.modificationId = modificationId;
         this.threadName = threadName;
-
         this.sessionId = sessionId;
     }
 
@@ -104,14 +110,16 @@ class PetClinicFlow implements Runnable {
 
         requestInformation.setPeriodNumber(0);
         requestInformation.setSessionId(sessionId);
-
+        requestInformation.setModificationId(modificationId);
 
         try {
             for (int executionNumber = 0; executionNumber < PetClinic.EXECUTION_COUNT; executionNumber++) {
                 requestInformation.setPeriodNumber(executionNumber);
                 petClinic.viewAndAdd();
             }
-        } catch (Exception e) {
+        } catch (ClientHandlerException e) {
+            logErr("Before running load generator please run petclinic app by command at petclinic project root 'mvn tomcat7:run'");
+         } catch (Exception e) {
             e.printStackTrace();
         }
     }

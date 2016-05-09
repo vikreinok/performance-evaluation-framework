@@ -2,6 +2,7 @@ package com.takipi.samples.servprof.inst;
 
 import com.takipi.samples.servprof.Options;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class InstrumentationFilterTest {
     }
 
     @Test
+    @Ignore
     public void testShouldInstrumentClass_basic() throws Exception {
 
         List<String> classpaths = new ArrayList<>();
@@ -42,6 +44,7 @@ public class InstrumentationFilterTest {
     }
 
     @Test
+    @Ignore
     public void testShouldInstrumentClass_shouldNotInstrument() throws Exception {
 
         List<String> classpaths = new ArrayList<>();
@@ -69,6 +72,7 @@ public class InstrumentationFilterTest {
     }
 
     @Test
+    @Ignore
     public void testShouldInstrumentMethod_basic() throws Exception {
         List<String> methodNames = new ArrayList<>();
         methodNames.add("toString");
