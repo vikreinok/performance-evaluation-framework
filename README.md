@@ -37,9 +37,9 @@ mkdir thesis
 cd thesis
 git clone https://viktor_reinok@bitbucket.org/viktor_reinok_thesis_team/thesis.git
 
-mvn -pl load-generator -am package assembly:single -DskipTests
+mvn -pl load-generator -am package assembly:single -DskipTests -P load-generator-build-profile
 cd load-generator/target
-java -jar load-generator-jar-with-dependencies.jar
+java -jar load-generator-jar-with-dependencies.jar 0000
 
 ```
 
@@ -48,9 +48,9 @@ java -jar load-generator-jar-with-dependencies.jar
 #!command line (windows)
 cd..
 cd..
-mvn -pl analyzer -am package assembly:single -DskipTests
+mvn -pl analyzer -am package assembly:single -DskipTests -P data-analyzer-build-profile
 cd analyzer/target
-java -jar analyzer-jar-with-dependencies.jar 0000
+java -jar analyzer-jar-with-dependencies.jar
  
 ```
 
@@ -70,9 +70,9 @@ mvn clean tomcat7:run
 #!command line (windows)
 cd..
 cd thesis
-mvn -pl load-generator -am package assembly:single -DskipTests
+mvn -pl load-generator -am package assembly:single -DskipTests -P load-generator-build-profile
 cd load-generator/target
-java -jar load-generator-jar-with-dependencies.jar
+java -jar load-generator-jar-with-dependencies.jar 0001
 
 ```
 
@@ -81,9 +81,9 @@ java -jar load-generator-jar-with-dependencies.jar
 #!command line (windows)
 cd..
 cd..
-mvn -pl analyzer -am package assembly:single -DskipTests
+mvn -pl analyzer -am package assembly:single -DskipTests -P data-analyzer-build-profile
 cd analyzer/target
-java -jar analyzer-jar-with-dependencies.jar 0001
+java -jar analyzer-jar-with-dependencies.jar
 ```
 
 
