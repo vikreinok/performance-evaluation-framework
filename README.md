@@ -57,7 +57,7 @@ java -jar analyzer-jar-with-dependencies.jar 0000
 ### Emulate the source code change and rerun Petclinic ###
 ```
 #!command line (windows)
-stop existing Petclinic
+stop existing deployed instance of Petclinic
 cd..
 cd..
 cd petclininc
@@ -83,7 +83,7 @@ cd..
 cd..
 mvn -pl analyzer -am package assembly:single -DskipTests
 cd analyzer/target
-java -jar analyzer-jar-with-dependencies.jar
+java -jar analyzer-jar-with-dependencies.jar 0001
 ```
 
 
