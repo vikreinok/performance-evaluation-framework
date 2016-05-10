@@ -34,6 +34,27 @@
         <jersey.version>1.19</jersey.version>
     </properties>
 
+    <profiles>
+        <profile>
+            <id>load-generator-build-profile</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <classpath.main>ee.ttu.thesis.petclinic.PetClinic</classpath.main>
+            </properties>
+        </profile>
+        <profile>
+            <id>data-analyzer-build-profile</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <classpath.main>ee.ttu.thesis.PetClinic</classpath.main>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -55,7 +76,8 @@
                         </descriptorRefs>
                         <archive>
                             <manifest>
-                                <mainClass>ee.ttu.thesis.petclinic.Petclinic</mainClass>
+                                <addClasspath>true</addClasspath>
+                                <mainClass>${classpath.main}</mainClass>
                             </manifest>
                         </archive>
                     </configuration>
