@@ -1,11 +1,17 @@
+# TALLINN UNIVERSITY OF TEHNOLOGY #
+### Faculty of Information technology ###
+### Department of Computer Science ###
+
+
+
 # Java application performance evaluation framework for empirical approach #
+### Master’s thesis ###
 
 
-This README would normally document whatever steps are necessary to get your application up and running.
-
+ 
 ## What is this repository for? ##
 
-* JAPEFFEA is a tool integatable to CI for analyzing performance issues
+* JAPEFFEA is a tool integratable to CI for analyzing performance issues and empiric approach
 * Version 0.0.1
 
 
