@@ -17,7 +17,7 @@ import static ee.ttu.thesis.util.Logger.logErr;
  */
 public class Analyzer {
 
-    public static final double DIFF_AVERAGE_THRESHOLD = 0.1;
+    public static final double DIFF_AVERAGE_THRESHOLD = 0.33;
 
     protected Set<Processor> processors = new HashSet<Processor>();
 
