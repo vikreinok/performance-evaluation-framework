@@ -4,14 +4,14 @@
 
 
 
-# Java application performance evaluation framework for empirical approach #
+# A framework for empirical evaluation of Java application performance #
 ### Master’s thesis ###
 
 
  
 ## What is this repository for? ##
 
-* JAPEFFEA is a tool integratable to CI for analyzing performance issues and empiric approach
+* FFEOJAP is a tool integratable to CI for analyzing performance issues and empiric approach
 * Version 0.0.1
 
 
