@@ -34,7 +34,7 @@ Following dependencies are required:
 
 mkdir petclinic
 cd petclinic
-git clone https://viktor_reinok@bitbucket.org/viktor_reinok/petclinic.git
+git clone https://bitbucket.org/viktor_reinok/petclinic.git
 mvn clean tomcat7:run 
 ```
 
@@ -44,7 +44,7 @@ mvn clean tomcat7:run
 cd..
 mkdir thesis
 cd thesis
-git clone https://viktor_reinok@bitbucket.org/viktor_reinok_thesis_team/thesis.git
+git clone https://bitbucket.org/viktor_reinok_thesis_team/thesis.git
 
 mvn -pl load-generator -am package assembly:single -DskipTests -P load-generator-build-profile
 cd load-generator/target
@@ -55,8 +55,7 @@ java -jar load-generator-jar-with-dependencies.jar 0000
 ### Launch the data analyzer ###
 ```
 #!command line (windows)
-cd..
-cd..
+cd../..
 mvn -pl analyzer -am package assembly:single -DskipTests -P data-analyzer-build-profile
 cd analyzer/target
 java -jar analyzer-jar-with-dependencies.jar
@@ -67,8 +66,7 @@ java -jar analyzer-jar-with-dependencies.jar
 ```
 #!command line (windows)
 stop existing deployed instance of Petclinic
-cd..
-cd..
+cd../..
 cd petclininc
 git checkout abc4b24337c8fce97aa557620b8ad8d7e047a49a -f
 mvn clean tomcat7:run
@@ -88,8 +86,7 @@ java -jar load-generator-jar-with-dependencies.jar 0001
 ### Launch the data analyzer again ###
 ```
 #!command line (windows)
-cd..
-cd..
+cd../..
 mvn -pl analyzer -am package assembly:single -DskipTests -P data-analyzer-build-profile
 cd analyzer/target
 java -jar analyzer-jar-with-dependencies.jar
