@@ -14,7 +14,7 @@
  
 ## What is this repository for? ##
 
-* FFEOJAP is a tool integrable to CI for analyzing performance issues and empiric approach
+* FFEOJAP is a tool integrable into CI for analyzing and tracking performance issue.
 * Version 0.0.1
 
 
