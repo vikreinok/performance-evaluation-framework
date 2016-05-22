@@ -50,8 +50,6 @@ public class HttpQuery {
 
         ObjectMapper om = new ObjectMapper();
 
-
-
         Response response = om.readValue(content, Response.class);
 
         List<Source> data = new ArrayList<Source>();
@@ -68,6 +66,11 @@ public class HttpQuery {
 //                writeToFile(source.getId(), source.getCallStack());
             }
         }
+
+        if (data == null || data.size() == 0) {
+            throw new IllegalStateException("Data is empty");
+        }
+
         return data;
     }
 
@@ -85,7 +88,7 @@ public class HttpQuery {
         // Have to preserve order of modification ids
         Map<String, List<String>> aggregations = new LinkedHashMap<String, List<String>>();
 
-        if (response.getAggregations() == null) {
+        if (response.getAggregations() == null && response.getAggregations().getGroupByModificationId().getBuckets().size() == 0) {
             throw new IllegalStateException("No request-id headers are found. Please make sure you have metrics data set and correct index name.");
         }
 
@@ -150,6 +153,7 @@ public class HttpQuery {
                 }
             }
         }
+
         String query = sb != null ? sb.toString() : "";
 //        log(String.format("<-------------------------------%-50s-------------------------------->", name));
 //        log(query);

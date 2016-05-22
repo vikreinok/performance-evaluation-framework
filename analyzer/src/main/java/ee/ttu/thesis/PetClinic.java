@@ -19,11 +19,9 @@ public class PetClinic {
 
 
     public static void main(String[] args) {
-        HttpQuery query = new HttpQuery();
 
         PetClinic petClinic = new PetClinic();
         petClinic.analyze();
-
     }
 
     private void analyze() {
@@ -49,10 +47,6 @@ public class PetClinic {
                 log(String.format("-----------------------ModificationId %s-----------------------", modificationId));
                 for (String requestId : uniqueModificationRequestIds.get(modificationId)) {
                     List<Source> data = esQuery.getResponseData(searchPath, "petclinic_generic.json", requestId, modificationId);
-
-                    if (data == null || data.size() == 0) {
-                        throw new IllegalStateException("Data is empty");
-                    }
 
                     Analyzer analyzer = new Analyzer();
                     analyzer.addProcessor(

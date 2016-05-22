@@ -10,8 +10,7 @@ import static junit.framework.Assert.assertTrue;
  */
 public class HttpQueryTest {
 
-
-    HttpQuery  httpQuery = null;
+    HttpQuery httpQuery = null;
 
     @Before
     public void setUp() throws Exception {
@@ -20,7 +19,8 @@ public class HttpQueryTest {
 
     @Test
     public void testGetQuery() throws Exception {
-        String query = httpQuery.getQuery("1");
-        assertTrue(query, !query.isEmpty());
+        final String queryFileName = "petclinic_generic.json";
+        String query = httpQuery.getQuery(queryFileName);
+        assertTrue(String.format("Could not find query in file: %s", queryFileName), !query.isEmpty());
     }
 }
