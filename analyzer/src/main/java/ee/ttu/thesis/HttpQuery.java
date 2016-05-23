@@ -3,24 +3,17 @@ package ee.ttu.thesis;
 
 import com.sun.jersey.api.client.ClientResponse;
 import ee.ttu.thesis.client.RequestBuilder;
-import ee.ttu.thesis.model.aggregations.Aggregation;
-import ee.ttu.thesis.model.aggregations.Bucket;
-import ee.ttu.thesis.model.aggregations.Bucket_;
-import ee.ttu.thesis.model.stagemonitor.Hit;
-import ee.ttu.thesis.model.stagemonitor.Response;
 import ee.ttu.thesis.model.stagemonitor.Source;
+import ee.ttu.thesis.transformer.Transformer;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,8 +23,23 @@ import java.util.Map;
  */
 public class HttpQuery {
 
-    private RequestBuilder rb;
 
+    final String type = "/requests";
+    String currentDate = DateTimeFormat.forPattern("yyyy.MM.dd").print(LocalDateTime.now());
+    String index = "stagemonitor-requests-" + currentDate;
+//    String index = "stagemonitor-requests-2016.05.06";
+    final String searchPath = index + type + "/_search";
+    final String settingsPath = index + type + "/_settings";
+
+    private RequestBuilder rb;
+    private Transformer transformer;
+
+    /**
+     * Singleton
+     * Package private for testability
+     *
+     * @see RequestBuilder
+     */
     RequestBuilder getRequestBuilder() {
         if (rb == null) {
             rb = new RequestBuilder("");
@@ -39,78 +47,47 @@ public class HttpQuery {
         return rb;
     }
 
-    public List<Source> getResponseData(String searchPath, String queryFileName, String requestId, String modificationId) throws IOException {
+    /**
+     * Singleton
+     * Package private for testability
+     *
+     * @see Transformer
+     */
+    Transformer getTransformer() {
+        if (transformer == null) {
+            transformer = new Transformer();
+        }
+        return transformer;
+    }
+
+    public List<Source> getResponseData(String queryFileName, String requestId, String modificationId) throws IOException {
         String query = getQuery(queryFileName);
         query = query.replaceFirst("\"\\{requestId\\}\"", "\"" + requestId + "\"");
         query = query.replaceFirst("\"\\{modificationId\\}\"", "\"" + modificationId + "\"");
-
-        ClientResponse clientResponse = getRequestBuilder().resource(searchPath).post(ClientResponse.class, query);
-        String content = getString(clientResponse.getEntityInputStream());
-//        log(content);
-
-        ObjectMapper om = new ObjectMapper();
-
-        Response response = om.readValue(content, Response.class);
-
-        List<Source> data = new ArrayList<Source>();
-        if (response != null && response.getHits() != null) {
-            List<Hit> hits = response.getHits().getHits();
-//            log(String.format("Size of data %d", hits.size()));
-            for (Hit hit : hits) {
-                Source source = hit.getSource();
-                data.add(source);
-
-//                log(hit.getId());
-//                parseResourcePaths(source.getCallStack());
-//                log(source);
-//                writeToFile(source.getId(), source.getCallStack());
-            }
-        }
-
-        if (data == null || data.size() == 0) {
-            throw new IllegalStateException("Data is empty");
-        }
-
-        return data;
+        String jsonResponse = executeQuery(query);
+        return getTransformer().transformToResponseData(jsonResponse);
     }
 
-    public Map<String, List<String>> getModificationRequestIds(String path, String queryFileName) throws IOException {
-
+    public Map<String, List<String>> getModificationRequestIds(String queryFileName) throws IOException {
         String payload = getQuery(queryFileName);
-        ClientResponse clientResponse = getRequestBuilder().resource(path).post(ClientResponse.class, payload);
-        String content = getString(clientResponse.getEntityInputStream());
-//        log(content);
-
-        ObjectMapper om = new ObjectMapper();
-
-        Aggregation response = om.readValue(content, Aggregation.class);
-
-        // Have to preserve order of modification ids
-        Map<String, List<String>> aggregations = new LinkedHashMap<String, List<String>>();
-
-        if (response.getAggregations() == null && response.getAggregations().getGroupByModificationId().getBuckets().size() == 0) {
-            throw new IllegalStateException("No request-id headers are found. Please make sure you have metrics data set and correct index name.");
-        }
-
-        for (Bucket modificationId : response.getAggregations().getGroupByModificationId().getBuckets()) {
-            List<String> requestIds = new ArrayList<String>();
-            for (Bucket_ requestId : modificationId.getGroupByRequestId().getBuckets()) {
-                requestIds.add(requestId.getKey());
-            }
-            aggregations.put(modificationId.getKey(), requestIds);
-        }
-
-        return aggregations;
+        String jsonResponse = executeQuery(payload);
+        return new Transformer().transformToModificationRequestId(jsonResponse);
     }
 
-    private void getSettings(String settingsPath) {
+    private String executeQuery(String query) {
+        ClientResponse clientResponse = getRequestBuilder().resource(searchPath).post(ClientResponse.class, query);
+        String jsonResponse = getString(clientResponse.getEntityInputStream());
+//        log(jsonResponse);
+        return jsonResponse;
+    }
+
+    private void getSettings() {
         ClientResponse settingsGetClientResponse = getRequestBuilder().resource(settingsPath).get(ClientResponse.class);
         String settingsGetContent = getString(settingsGetClientResponse.getEntityInputStream());
         log(settingsGetContent);
     }
 
-    private void putSettings(String settingsPath) {
-
+    private void putSettings() {
         String settingsPayload = getQuery("settings.json");
         ClientResponse settingsPutClientResponse = getRequestBuilder().resource(settingsPath).put(ClientResponse.class, settingsPayload);
         String settingsPutContent = getString(settingsPutClientResponse.getEntityInputStream());
@@ -193,15 +170,6 @@ public class HttpQuery {
             }
         }
         return nthLineContent;
-    }
-
-
-    private void writeToFile(String id, String message) {
-        try {
-            Files.write(Paths.get(String.format("C:\\Users\\Viktor.Reinok\\Desktop\\callStacks\\%s.txt", id)), message.getBytes(Charset.forName("UTF-8")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private String getString(InputStream is) {

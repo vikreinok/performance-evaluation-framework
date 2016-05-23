@@ -5,8 +5,6 @@ import ee.ttu.thesis.model.stagemonitor.Source;
 import ee.ttu.thesis.processor.*;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +17,6 @@ public class PetClinic {
 
 
     public static void main(String[] args) {
-
         PetClinic petClinic = new PetClinic();
         petClinic.analyze();
     }
@@ -28,25 +25,18 @@ public class PetClinic {
         try {
             HttpQuery esQuery = new HttpQuery();
 
-            String currentDate = DateTimeFormat.forPattern("yyyy.MM.dd").print(LocalDateTime.now());
-            String index = "stagemonitor-requests-" + currentDate;
-//            String index = "stagemonitor-requests-2016.05.06";
-            final String type = "/requests";
-            final String searchPath = index + type + "/_search";
-            final String settingsPath = index + type + "/_settings";
+//            getSettings();
+//            putSettings();
 
-//            getSettings(settingsPath);
-//            putSettings(settingsPath);
-
-            Map<String, List<String>> uniqueModificationRequestIds = esQuery.getModificationRequestIds(searchPath, "petclinic_uniqueModificationAndRequestIds.json");
+            Map<String, List<String>> uniqueModificationRequestIds = esQuery.getModificationRequestIds("petclinic_uniqueModificationAndRequestIds.json");
 
 
-            Map<String, List<Result>> previousResults = new HashMap<String, List<Result>>();
-
-            for (String modificationId :uniqueModificationRequestIds.keySet()) {
+            for (String modificationId : uniqueModificationRequestIds.keySet()) {
                 log(String.format("-----------------------ModificationId %s-----------------------", modificationId));
+
+                Map<String, List<Result>> previousResults = new HashMap<String, List<Result>>();
                 for (String requestId : uniqueModificationRequestIds.get(modificationId)) {
-                    List<Source> data = esQuery.getResponseData(searchPath, "petclinic_generic.json", requestId, modificationId);
+                    List<Source> data = esQuery.getResponseData("petclinic_generic.json", requestId, modificationId);
 
                     Analyzer analyzer = new Analyzer();
                     analyzer.addProcessor(
@@ -63,7 +53,6 @@ public class PetClinic {
 //                    log(response);
                 }
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
