@@ -14,10 +14,9 @@ public class Builder {
 
     public String buildLoadGenerator() {
         try {
-            Runtime rt = Runtime.getRuntime();
-            String prefix = OSValidator.isWindows() ? WIN_PREFIX : "";
+            String prefix = getPrefix();
 
-            Process process = rt.exec(prefix + "mvn -pl load-generator -am package assembly:single -DskipTests -P load-generator-build-profile");
+            Process process = Runtime.getRuntime().exec(prefix + "mvn -pl load-generator -am package assembly:single -DskipTests -P load-generator-build-profile");
             return getStandardOutput(process);
 
         } catch (IOException e) {
@@ -26,18 +25,24 @@ public class Builder {
         return null;
     }
 
+
     public String buildDataAnalyzer() {
         try {
-            Runtime rt = Runtime.getRuntime();
-            String prefix = OSValidator.isWindows() ? WIN_PREFIX : "";
+            String prefix = getPrefix();
 
-            Process process = rt.exec(prefix + "mvn -pl analyzer -am package assembly:single -DskipTests -P data-analyzer-build-profile");
+            Process process = Runtime.getRuntime().exec(prefix + "mvn -pl analyzer -am package assembly:single -DskipTests -P data-analyzer-build-profile");
             return getStandardOutput(process);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String getPrefix() {
+        String prefix = OSValidator.isWindows() ? WIN_PREFIX : "";
+        prefix += "cd.. & ";
+        return prefix;
     }
 
     private String getStandardOutput(Process process) {
@@ -49,6 +54,7 @@ public class Builder {
         try {
             input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             while ((line = input.readLine()) != null) {
+                System.out.println(line);
                 sb.append(line);
                 sb.append(lineSeparator);
             }
