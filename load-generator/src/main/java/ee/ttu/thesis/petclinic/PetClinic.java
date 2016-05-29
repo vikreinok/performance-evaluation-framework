@@ -11,7 +11,8 @@ import javax.ws.rs.core.MediaType;
 import static ee.ttu.thesis.util.Logger.logErr;
 
 /**
- *
+ * Load tests for Pet Clinic application
+ * @Link https://github.com/spring-projects/spring-petclinic
  */
 public class PetClinic extends AbstractLoadGenerator {
 

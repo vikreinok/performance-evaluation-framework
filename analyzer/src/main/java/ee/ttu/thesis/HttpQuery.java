@@ -19,7 +19,7 @@ import java.util.Map;
 
 
 /**
- *
+ * Elastic Search HTTP generic queries
  */
 public class HttpQuery {
 

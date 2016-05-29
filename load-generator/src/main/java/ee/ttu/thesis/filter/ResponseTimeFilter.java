@@ -12,7 +12,7 @@ import java.io.OutputStreamWriter;
 import java.util.List;
 
 /**
- *
+ * For logging request time
  */
 public class ResponseTimeFilter extends ClientFilter {
 
@@ -55,6 +55,10 @@ public class ResponseTimeFilter extends ClientFilter {
     }
 
 
+    /**
+     * TODO use logging framework such a log4j
+     * @param message
+     */
     private void log(String message) {
         try {
             BufferedWriter log = new BufferedWriter(new OutputStreamWriter(System.out));

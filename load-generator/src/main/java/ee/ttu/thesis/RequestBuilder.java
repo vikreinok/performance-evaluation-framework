@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
 /**
- *
+ * Builder for creating HTTP request with required HTTP headers by data analyzer
  */
 public class RequestBuilder {
 
@@ -23,7 +23,8 @@ public class RequestBuilder {
     public static final String HEADER_NAME_SESSION_ID = "session-id";
     public static final String HEADER_NAME_PERIOD_NUMBER = "period-number";
     public static final String HEADER_NAME_MODIFICATION_ID = "modification-id";
-    public final SetHeaderFilter DEFAULT_CONTENT_TYPE_HEADER = new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+    public SetHeaderFilter DEFAULT_CONTENT_TYPE_HEADER = new SetHeaderFilter(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
     public SetHeaderFilter requestNameFilter = new SetHeaderFilter(HEADER_NAME_REQUEST_NAME, "");
     public SetHeaderFilter requestIdFilter = new SetHeaderFilter(HEADER_NAME_REQUEST_ID, "");
@@ -58,6 +59,15 @@ public class RequestBuilder {
         getClient();
     }
 
+    /**
+     *  Builder for creating a callable
+     *  @link WebResource
+     *
+     * @param path path or REST service
+     * @param requestId unique request ID to distinguish HTTP requests in data analyzer
+     * @param values (optional) for anchors and such
+     * @return
+     */
     public WebResource resource(String path, String requestId, Object... values) {
         setRequestNameFilterValue(requestInformation.buildRequestName(requestId));
         setRequestIdFilterValue(requestId);
@@ -80,6 +90,11 @@ public class RequestBuilder {
         return resource;
     }
 
+    /**
+     * Singleton
+     *
+     * @return Client
+     */
     protected Client getClient() {
         if (client == null) {
 

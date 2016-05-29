@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Data analyzer initializer for Pet Clinic application
+ * Elastic search queries are suited for load data generated for Per Clinic application
  */
 public class PetClinic {
 
