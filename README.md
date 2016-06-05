@@ -75,7 +75,6 @@ cd../..
 mvn -pl load-generator -am package assembly:single -DskipTests -P load-generator-build-profile
 cd load-generator/target
 java -jar load-generator-jar-with-dependencies.jar 0001
-
 ```
 
 ### Launch the data analyzer again ###
