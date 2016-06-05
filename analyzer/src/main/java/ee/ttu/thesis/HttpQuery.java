@@ -11,7 +11,6 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -107,8 +106,16 @@ public class HttpQuery {
             }
             File file;
             try {
-                file = new File(url.toURI());
-            } catch (URISyntaxException e) {
+                // FIXME hack. Depends on executable name
+                String urlString = url.toString();
+                if (urlString.contains(".jar")) {
+                    urlString = urlString.replace("/analyzer-jar-with-dependencies.jar!", "/classes");
+                    urlString = urlString.replace("jar:file:/", "");
+                }
+                System.out.println(urlString);
+                System.out.println(urlString);
+                file = new File(urlString);
+            } catch (Exception e) {
                 file = new File(url.getPath());
             }
             in = new FileInputStream(file);
