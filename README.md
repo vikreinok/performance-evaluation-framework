@@ -31,20 +31,17 @@ Following dependencies are required:
 ### Run an example application [Perclinic ](https://bitbucket.org/viktor_reinok/petclinic) ###
 ```
 #!command line (windows)
-
-mkdir petclinic
-cd petclinic
 git clone https://bitbucket.org/viktor_reinok/petclinic.git
+cd petclinic
 mvn clean tomcat7:run 
 ```
 
 ### Launch the load generator ###
 ```
 #!command line (windows)
-cd..
-mkdir thesis
-cd thesis
+# new shell session
 git clone https://bitbucket.org/viktor_reinok_thesis_team/thesis.git
+cd thesis
 
 mvn -pl load-generator -am package assembly:single -DskipTests -P load-generator-build-profile
 cd load-generator/target
@@ -65,9 +62,7 @@ java -jar analyzer-jar-with-dependencies.jar
 ### Emulate the source code change and re launch the Petclinic applicatoin ###
 ```
 #!command line (windows)
-stop existing deployed instance of Petclinic
-cd../..
-cd petclininc
+# stop existing deployed instance of Petclinic
 git checkout abc4b24337c8fce97aa557620b8ad8d7e047a49a -f
 mvn clean tomcat7:run
 ```
@@ -75,8 +70,8 @@ mvn clean tomcat7:run
 ### Launch the load generator again  ###
 ```
 #!command line (windows)
-cd..
-cd thesis
+# back in thesis shell
+cd../..
 mvn -pl load-generator -am package assembly:single -DskipTests -P load-generator-build-profile
 cd load-generator/target
 java -jar load-generator-jar-with-dependencies.jar 0001
