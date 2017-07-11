@@ -6,6 +6,9 @@ import com.mcbfinance.aio.model.CustomerCommunicationSettings;
 import com.mcbfinance.aio.model.extraservice.ExtraService;
 import com.mcbfinance.aio.web.rest.filters.CountryContextFilterFactory;
 import com.mcbfinance.aio.web.rest.model.*;
+import com.mcbfinance.aio.web.rest.model.auth.registration.UserRegistrationDataDTO;
+import com.mcbfinance.aio.web.rest.model.auth.registration.UserRegistrationInitDataDTO;
+import com.mcbfinance.aio.web.rest.model.auth.registration.UserRegistrationInitResponseDTO;
 import com.mcbfinance.aio.web.rest.model.creditapp.*;
 import com.mcbfinance.aio.web.rest.model.product.ProductWithExtraServicesDTO;
 import com.mcbfinance.aio.web.rest.resources.authentication.BanksAuthenticationResourceEE;
@@ -244,7 +247,7 @@ public class Aio extends AbstractLoadGenerator {
             rb.removeContentType();
 
             ClientResponse clientResponse = rb.resource("authentication/banks_ee/dummy_bank_ee_id/confirm", "00000")
-                    .queryParam(BanksAuthenticationResourceEE.BankAuthenticationResource.TRANSACTION_ID, iPizzaAuthenticationResponseDTO.transactionId)
+                    .queryParam(BanksAuthenticationResourceEE.TRANSACTION_ID, iPizzaAuthenticationResponseDTO.transactionId)
                     .queryParam(BanksAuthenticationResourceEE.BankAuthenticationResource.CALLBACK_PARAM, bankAuthenticationRequestDTO.callbackUrl)
                     .type(MediaType.APPLICATION_FORM_URLENCODED)
                     .post(ClientResponse.class, postEntity);
@@ -404,7 +407,7 @@ public class Aio extends AbstractLoadGenerator {
         } catch (ClientHandlerException e) {
             e.printStackTrace();
         }
-        CreditApplicationDTO creditApplicationPutDTO = rb.resource("credit-application", "00230").put(CreditApplicationDTO.class, new NewApplicationDTO());
+        CreditApplicationDTO creditApplicationPutDTO = rb.resource("credit-application", "00230").put(CreditApplicationDTO.class);
         Collection<LoanIssuerDTO> loanIssuerDTOs = rb.resource("credit-application/loanissuers", "00240").get(new GenericType<Collection<LoanIssuerDTO>>() {
         });
         Collection<PostOfficeDTO> postOfficeDTOs = rb.resource("authentication/ee/postoffices", "00250").get(new GenericType<Collection<PostOfficeDTO>>() {
@@ -434,7 +437,7 @@ public class Aio extends AbstractLoadGenerator {
         userRegistrationInitDataDTO.msisdn = msisdn;
 
         UserRegistrationInitResponseDTO response = rb.resource("authentication/user-registration/register-init", "00000").post(UserRegistrationInitResponseDTO.class, userRegistrationInitDataDTO);
-        UserRegistrationEEDataDTO userRegistrationEEDataDTO = new UserRegistrationEEDataDTO();
+        UserRegistrationDataDTO userRegistrationEEDataDTO = new UserRegistrationDataDTO();
         userRegistrationEEDataDTO.ssn = userRegistrationInitDataDTO.ssn;
         userRegistrationEEDataDTO.msisdn = userRegistrationInitDataDTO.msisdn;
         userRegistrationEEDataDTO.firstName = "Ivan";
