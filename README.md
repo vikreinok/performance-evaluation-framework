@@ -15,10 +15,10 @@
 ## What is this repository for? ##
 
 * FFEOJAP is a tool integrable into CI loop to detect and track performance issues. The fraework will provide solution for following questions
-⋅⋅1 How do I find performance issues?
-⋅⋅2 How do I the root casue of the performance issue?
-⋅⋅3 How do I validatae the effectivness of the fix
-⋅⋅4 How do I make sure the fix does not affect other parts of the system in negative way. 
+1) How do I find performance issues?
+2) How do I the root casue of the performance issue?
+3) How do I validatae the effectivness of the fix
+4) How do I make sure the fix does not affect other parts of the system in negative way. 
 * Version 0.0.1
 
 
@@ -32,7 +32,7 @@ Following dependencies are required:
 
 --------------------
 
-### Run an example application [Perclinic ](https://bitbucket.org/viktor_reinok/petclinic) ###
+### Run an example application [Petclinic ](https://bitbucket.org/viktor_reinok/petclinic) ###
 ```
 #!command line (windows)
 git clone https://bitbucket.org/viktor_reinok/petclinic.git
