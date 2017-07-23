@@ -14,10 +14,10 @@
  
 ## What is this repository for? ##
 
-* FFEOJAP is a tool integrable into CI loop to detect and track performance issues. The fraework will provide solution for following questions
+* FFEOJAP is a tool integrable into CI loop to detect and track performance issues. The framework will provide solution for following questions
 1) How do I find performance issues?
-2) How do I the root casue of the performance issue?
-3) How do I validatae the effectivness of the fix
+2) How do I the root cause of the performance issue?
+3) How do I validate the effectiveness of the fix
 4) How do I make sure the fix does not affect other parts of the system in negative way. 
 * Version 0.0.1
 
