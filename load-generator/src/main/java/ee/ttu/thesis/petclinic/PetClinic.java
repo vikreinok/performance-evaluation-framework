@@ -20,7 +20,7 @@ public class PetClinic extends AbstractLoadGenerator {
 
     public static void main(String[] args) {
         String modificationId = getFirstArgumentValue(args);
-        new PetClinic().start(modificationId);
+        new PetClinic().start(modificationId, "Petclinic");
     }
 
 

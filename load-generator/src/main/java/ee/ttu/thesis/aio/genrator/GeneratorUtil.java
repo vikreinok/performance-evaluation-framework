@@ -7,7 +7,7 @@ import java.util.Random;
  */
 public class GeneratorUtil {
 
-    public static final String generateMsisd() {
+    public static final String generateEEMsisd() {
         String msisdn = "+37256" + (generateRandomNumber(899999) + 100000);
         logToConsole(String.format("Generated msisdn %s", msisdn));
         return msisdn;
@@ -16,7 +16,7 @@ public class GeneratorUtil {
     public static final String generateIdentifier() {
 
         String centuryAndSex = generateRandomNumber(1) == 1 ? "4" : "3";
-        String years = String.format("%02d", generateRandomNumber(95 - 40) + 40);
+        String years = String.format("%02d", generateRandomNumber(105 - 40) + 40);
         String months = String.format("%02d", generateRandomNumber(11) + 1);
         String days = String.format("%02d", generateRandomNumber(27) + 1);
         String randomDigits = String.format("%03d", generateRandomNumber(999));
@@ -26,6 +26,12 @@ public class GeneratorUtil {
 
         logToConsole(String.format("Generated ssn %s", ssn));
         return ssn;
+    }
+
+    public static final String generateEmail() {
+        String email = String.format("email%06d@email.com", generateRandomNumber(999999));
+        logToConsole(String.format("Generated ssn %s", email));
+        return email;
     }
 
     private static int generateRandomNumber(int n) {
@@ -62,5 +68,9 @@ public class GeneratorUtil {
         }
 
         return controlDigit;
+    }
+
+    public static String generateMsisdn(String countryCode) {
+        return countryCode + generateRandomNumber(99999999);
     }
 }

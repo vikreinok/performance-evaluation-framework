@@ -17,6 +17,12 @@ public class AbstractExecutable {
         return prefix;
     }
 
+    protected String getPrefix(String path) {
+        String prefix = OSValidator.isWindows() ? WIN_PREFIX : "";
+        prefix += String.format("cd %s & ", path);
+        return prefix;
+    }
+
     protected String getStandardOutput(Process process) {
         String lineSeparator = StringUtil.getLineSeparator();
         StringBuilder sb = new StringBuilder();
@@ -26,7 +32,7 @@ public class AbstractExecutable {
         try {
             input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             while ((line = input.readLine()) != null) {
-                System.out.println(line);
+//                System.err.println(line);
                 sb.append(line);
                 sb.append(lineSeparator);
             }

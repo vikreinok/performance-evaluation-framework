@@ -44,7 +44,7 @@
                         <source>${java.version}</source>
                         <target>${java.version}</target>
                         <excludes>
-                            <exclude>ee/ttu/thesis/aio/Aio.java</exclude>
+                            <exclude>ee/ttu/thesis/aio/*.java</exclude>
                         </excludes>
                     </configuration>
                 </plugin>

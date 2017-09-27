@@ -30,7 +30,7 @@ public class ResponseTimeFilter extends ClientFilter {
         long endTime = System.currentTimeMillis();
 
         long responseTime = endTime - startTime;
-        String message = String.format("%-180s %-15s %06d [ms]%n", clientRequest.getURI().toString(), header, responseTime);
+        String message = String.format("%-6s %-180s %-15s %06d [ms]%n", clientRequest.getMethod(), clientRequest.getURI().toString(), header, responseTime);
         log(message);
         this.logResponse(identifier, response);
         return response;

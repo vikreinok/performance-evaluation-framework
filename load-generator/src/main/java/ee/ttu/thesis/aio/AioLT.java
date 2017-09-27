@@ -1,17 +1,19 @@
 package ee.ttu.thesis.aio;
 
 import com.mcbfinance.aio.builder.TestDataBuilder;
-import com.mcbfinance.aio.model.CountryCodes;
-import com.mcbfinance.aio.model.CustomerCommunicationSettings;
 import com.mcbfinance.aio.model.extraservice.ExtraService;
+import com.mcbfinance.aio.selfservice.facade.application.CreditApplicationSteps;
 import com.mcbfinance.aio.web.rest.filters.CountryContextFilterFactory;
 import com.mcbfinance.aio.web.rest.model.*;
 import com.mcbfinance.aio.web.rest.model.auth.registration.UserRegistrationDataDTO;
 import com.mcbfinance.aio.web.rest.model.auth.registration.UserRegistrationInitDataDTO;
 import com.mcbfinance.aio.web.rest.model.auth.registration.UserRegistrationInitResponseDTO;
+import com.mcbfinance.aio.web.rest.model.auth.registration.UserRegistrationInitResponseLTDTO;
+import com.mcbfinance.aio.web.rest.model.auth.registration.lt.UserRegistrationIdentifyDTO;
+import com.mcbfinance.aio.web.rest.model.auth.registration.lt.UserRegistrationIdentifyResponseDTO;
+import com.mcbfinance.aio.web.rest.model.auth.registration.lt.UserRegistrationPaymentDataResponseLTDTO;
 import com.mcbfinance.aio.web.rest.model.creditapp.*;
 import com.mcbfinance.aio.web.rest.model.product.ProductWithExtraServicesDTO;
-import com.mcbfinance.aio.web.rest.resources.authentication.BanksAuthenticationResourceEE;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
@@ -19,8 +21,6 @@ import com.sun.jersey.api.client.UniformInterfaceException;
 import ee.ttu.thesis.RequestBuilder;
 import ee.ttu.thesis.aio.genrator.GeneratorUtil;
 import ee.ttu.thesis.aio.model.DomainInformation;
-import ee.ttu.thesis.aio.model.RequestInformation;
-import ee.ttu.thesis.petclinic.AbstractLoadGenerator;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -32,61 +32,59 @@ import java.util.Random;
 /**
  *
  */
-public class Aio extends AbstractLoadGenerator {
+public class AioLT extends AbstractAio {
 
-    public static final String CONTEXT_PATH = "loanengine/rest/";
-    public static final int EXECUTION_COUNT = 50;
-
-    protected DomainInformation domainInformation = null;
-
-    public static void main(String[] args) {
-        new Aio().start(null);
-    }
-
-    public static void logToConsole(Object obj) {
-//        System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
+    @Override
+    public String getCountry() {
+        return "LT";
     }
 
     @Override
-    protected Runnable getCustomerFlow(String modificationId, Integer sessionId) {
-        // Modification id no implemented because it is out of scope to fix huge applications
-        return new AioFlow(sessionId);
+    public String getLanguage() {
+        return "lt";
     }
 
+    @Override
+    public String getBrand() {
+        return "credit24";
+    }
+
+    public static void main(String[] args) {
+        new AioLT().start(null, "AIO_LT");
+    }
+
+    @Override
     public void registration() {
         setUp();
 
-//        registrationEEC24();
-        registerOrAuthenticateEESving(null);
+        registerOrAuthenticate(null);
         openApplicationForm();
         submitApplication();
-        String randomProductId = productSelectionView();
-        productSelection(randomProductId);
-        afterApplicationSubmit();
+        String randomProductId = openProductSelectionView();
+        selectProduct(randomProductId);
+        verifySubmitView();
         acceptCases(2);
 
         logout();
 
         domainInformation.print();
 
-        // SS
-        //decrease CL
-//        rb.get("contracts/26317933504/extra-services/predicted/changeCreditLine?upgrade=false", genericType);
-        // click on change preferneces (eelistused)
-//        rb.post("credit-application/mmp", genericType, "{\"contractDeliveryMethod\":\"EMAIL\",\"invoiceDeliveryMethod\":\"EMAIL\",\"preDueDateReminderSMS\":\"false\",\"marketingPermission\":\"false\"}"); // {"mmp":0}
-
     }
 
+    @Override
+    public void registerOrAuthenticate(String ssn) {
+        registerOrAuthenticateLTC24(ssn);
+    }
+
+    @Override
     public void viewSSAndDraw() {
-        String ssn = domainInformation.getSsn();
+//        setUp();
 
-        setUp();
-
-        registerOrAuthenticateEESving(ssn);
+        login(String.valueOf(domainInformation.getCustomerId()), PASSWORD_DEFAULT);
         generateInvoice();
         String contractId = openSS();
 //        changeDueDateInSS();
-        clickOnAccountStatemetn(contractId);
+        clickOnAccountStatement(contractId);
         drawSS(contractId);
         acceptCases(1);
         clickOnInvoicesAndContracts(contractId);
@@ -94,12 +92,6 @@ public class Aio extends AbstractLoadGenerator {
         logout();
 
         domainInformation.print();
-
-        // SS
-        //decrease CL
-//        rb.get("contracts/26317933504/extra-services/predicted/changeCreditLine?upgrade=false", genericType);
-        // click on change preferneces (eelistused)
-//        rb.post("credit-application/mmp", genericType, "{\"contractDeliveryMethod\":\"EMAIL\",\"invoiceDeliveryMethod\":\"EMAIL\",\"preDueDateReminderSMS\":\"false\",\"marketingPermission\":\"false\"}"); // {"mmp":0}
 
     }
 
@@ -111,9 +103,9 @@ public class Aio extends AbstractLoadGenerator {
         rb = new RequestBuilder(CONTEXT_PATH);
         rb.builder()
                 .addHeader("RandomHeader", "randomHeader")
-                .addHeader(CountryContextFilterFactory.BRAND_HEADER, "sving")
-                .addHeader(CountryContextFilterFactory.LANGUAGE_HEADER, "et")
-                .addHeader(CountryContextFilterFactory.COUNTRY_HEADER, "EE")
+                .addHeader(CountryContextFilterFactory.BRAND_HEADER, getBrand())
+                .addHeader(CountryContextFilterFactory.LANGUAGE_HEADER, getLanguage())
+                .addHeader(CountryContextFilterFactory.COUNTRY_HEADER, getCountry())
                 .build();
 
         rb.setRequestInformation(requestInformation);
@@ -133,10 +125,6 @@ public class Aio extends AbstractLoadGenerator {
         rb.resource("developer/invoices/processLate", "00000").queryParam("id", invoiceId).put();
     }
 
-    protected void logout() {
-        rb.resource("authentication", "11000").delete();
-    }
-
     private void clickOnInvoicesAndContracts(String contractId) {
 
         Collection<InvoiceDTO> invoiceDTOs = rb.resource(String.format("contracts/%s/invoices", contractId), "01010").get(new GenericType<Collection<InvoiceDTO>>() {
@@ -147,7 +135,7 @@ public class Aio extends AbstractLoadGenerator {
         logToConsole(clientResponse);
     }
 
-    private void clickOnAccountStatemetn(String contractId) {
+    private void clickOnAccountStatement(String contractId) {
         AccountStatementDTO accountStatementDTO = rb.resource(String.format("contracts/%s/account-statement", contractId), "00810").queryParam("from", "2016-01-07").get(AccountStatementDTO.class);
         logToConsole(accountStatementDTO);
     }
@@ -228,30 +216,56 @@ public class Aio extends AbstractLoadGenerator {
         return contractId;
     }
 
-    private void registerOrAuthenticateEESving(String ssn) {
+    private void registerOrAuthenticateLTC24(String ssn) {
 
-        Collection<String> banks = rb.resource("authentication/banks_ee/", "00100").get(new GenericType<Collection<String>>() {
+//        try {
+//            AuthenticationInfoDTO authenticationInfoDTO = rb.resource("authentication", "00100").get(AuthenticationInfoDTO.class);
+//        } catch (UniformInterfaceException e) {
+//            e.getResponse().getStatus(); // 401
+//        } catch (ClientHandlerException e) {
+//            e.printStackTrace();
+//        }
+
+        Collection<String> banks = rb.resource("authentication/user-registration/list-banks-lt", "00110").get(new GenericType<Collection<String>>() {
         });
 
-        BankAuthenticationRequestDTO bankAuthenticationRequestDTO = new BankAuthenticationRequestDTO();
-        bankAuthenticationRequestDTO.callbackUrl = "https://demo.sving.com/ee/application/";
-
-        IPizzaAuthenticationResponseDTO iPizzaAuthenticationResponseDTO = rb.resource("authentication/banks_ee/dummy_bank_ee_id", "00110").post(IPizzaAuthenticationResponseDTO.class, bankAuthenticationRequestDTO);
 
         if (ssn == null) {
             ssn = GeneratorUtil.generateIdentifier();
         }
 
-        try {
-            String postEntity = "CSSN=" + ssn + "&t=" + iPizzaAuthenticationResponseDTO.transactionId;
-            rb.removeContentType();
+        String email = GeneratorUtil.generateEmail();
+        String msisdn = GeneratorUtil.generateMsisdn("+370");
 
-            ClientResponse clientResponse = rb.resource("authentication/banks_ee/dummy_bank_ee_id/confirm", "00000")
-                    .queryParam(BanksAuthenticationResourceEE.TRANSACTION_ID, iPizzaAuthenticationResponseDTO.transactionId)
-                    .queryParam(BanksAuthenticationResourceEE.BankAuthenticationResource.CALLBACK_PARAM, bankAuthenticationRequestDTO.callbackUrl)
-                    .type(MediaType.APPLICATION_FORM_URLENCODED)
-                    .post(ClientResponse.class, postEntity);
-            if (clientResponse.getStatus() == 303) {
+
+
+        UserRegistrationInitDataDTO requestInitDto = new UserRegistrationInitDataDTO();
+        requestInitDto.ssn = ssn;
+        requestInitDto.password = PASSWORD_DEFAULT;
+        requestInitDto.msisdn = msisdn;
+
+        UserRegistrationInitResponseLTDTO responseInitDto = rb.resource("authentication/user-registration/register-init-lt-c24", "00120").post(UserRegistrationInitResponseLTDTO.class, requestInitDto);
+
+
+        UserRegistrationDataDTO requestConfirmDto = new UserRegistrationDataDTO();
+        requestConfirmDto.bankName = banks.iterator().next();
+        requestConfirmDto.email = email;
+        requestConfirmDto.ssn = ssn;
+        requestConfirmDto.msisdn = msisdn;
+        requestConfirmDto.password = PASSWORD_DEFAULT;
+        requestConfirmDto.bankReturnUrl = "https://dt01.credit24.com/lt/application/";
+        requestConfirmDto.otp = OTP_DEFAULT;
+        requestConfirmDto.consent = true;
+        requestConfirmDto.politicallyExposedPerson = false;
+        requestConfirmDto.dataProcessingConsent = true;
+
+
+        try {
+
+            ClientResponse clientResponse =  rb.resource("authentication/user-registration/register-confirm-lt-c24", "00130")
+                     .post(ClientResponse.class, requestConfirmDto);
+
+            if (clientResponse.getStatus() == 200) {
                 rb.addHeader(HttpHeaders.COOKIE, clientResponse.getHeaders().get(HttpHeaders.SET_COOKIE).get(0));
             }
         } catch (Exception e) {
@@ -259,20 +273,39 @@ public class Aio extends AbstractLoadGenerator {
         } finally {
             rb.setType(MediaType.APPLICATION_JSON);
         }
+
+        AuthenticationInfoDTO authenticationInfoDTO2 = rb.resource("authentication", "00140").get(AuthenticationInfoDTO.class);
+
+
+        String response  = rb.resource("authentication/banks_lt/one-cent-payment-status-lt", "00150").queryParam("customer_id", authenticationInfoDTO2.customer.id).get(String.class);
+
+        UserRegistrationPaymentDataResponseLTDTO iPizzaAuthenticationResponseDTO = rb.resource("authentication/user-registration/get-payment-data", "00160").get(UserRegistrationPaymentDataResponseLTDTO.class);
+
+        Collection<String> banks2 = rb.resource("authentication/user-registration/list-banks-lt", "00170").get(new GenericType<Collection<String>>() {
+        });
+
+        domainInformation.setCustomerId(Long.valueOf(authenticationInfoDTO2.customer.id));
         domainInformation.setSsn(ssn);
+        domainInformation.setMsisdn(msisdn);
+
+        UserRegistrationIdentifyDTO userRegistrationIdentifyDTO = new UserRegistrationIdentifyDTO();
+        userRegistrationIdentifyDTO.id = domainInformation.getCustomerId();
+        userRegistrationIdentifyDTO.identifier = domainInformation.getSsn();
+
+        UserRegistrationIdentifyResponseDTO userRegistrationIdentifyResponseDTO = rb.resource("authentication/user-registration/identify-demo-lt-c24", "00180").post(UserRegistrationIdentifyResponseDTO.class, userRegistrationIdentifyDTO);
+
+
+//        rb.resource("developer/cases/user-registration", "00175").queryParam("ssn", domainInformation.getSsn()).post(); // 204 no content
+
 
         logToConsole(banks);
+        logToConsole(authenticationInfoDTO2);
         logToConsole(iPizzaAuthenticationResponseDTO);
+        logToConsole(userRegistrationIdentifyResponseDTO);
     }
 
-    private void acceptCases(int nrOfCalls) {
-        // dev resource accept cases
-        for (int count = 0; count < nrOfCalls; count++) {
-            rb.resource("developer/cases", "100" + +nrOfCalls + count).post(); // 204 no content
-        }
-    }
-
-    private void afterApplicationSubmit() {
+    @Override
+    public void verifySubmitView() {
         // after submit
         SubmitApplicationDTO submitApplicationDTO = new SubmitApplicationDTO();
         submitApplicationDTO.firstDrawAmount = 0;
@@ -280,11 +313,14 @@ public class Aio extends AbstractLoadGenerator {
         CreditApplicationDTO creditApplicationDTO2 = rb.resource("credit-application", "00620").get(CreditApplicationDTO.class);
         // why credit app 2. request
 
+        rb.resource("developer/creditApplications/requestBka", "00630").post(); // 204 no content
+
         logToConsole(creditApplicationDTO);
         logToConsole(creditApplicationDTO2);
     }
 
-    private void productSelection(String randomProductId) {
+    @Override
+    public void selectProduct(String randomProductId) {
         // submit view
         rb.resource("credit-application/product", "00510").put(new ProductSelectionWithFirstDrawtDTO(Long.valueOf(randomProductId), null)); // 204 no response
         DuedateRangeDTO duedateRangeDTO = rb.resource("credit-application/duedate/range", "00520").get(DuedateRangeDTO.class);
@@ -306,31 +342,33 @@ public class Aio extends AbstractLoadGenerator {
         logToConsole(mmpdto3);
     }
 
-    private String productSelectionView() {
-        // Product selection view
+    @Override
+    public String openProductSelectionView() {
+
+        AuthenticationInfoDTO authenticationInfoDTO = rb.resource("authentication", "00400").get(AuthenticationInfoDTO.class);
+
+        List<ClosedContractDTO> closedContractDTOs = rb.resource("customer-lt/closed-contracts", "00410").get((new GenericType<List<ClosedContractDTO>>() {
+        }));
 
         CreditApplicationDTO creditApplicationDTO = rb.resource("credit-application", "00410").get(CreditApplicationDTO.class);
 
-
-        Map<Long, Collection<DrawSelectionsDTO>> drawSections = rb.resource("products/draw-selections", "00420").get(new GenericType<Map<Long, Collection<DrawSelectionsDTO>>>() {
-        });  // 200  draw sections
-        Map<Long, Collection<DrawSelectionsDTO>> drawSectionsWithMaturity = rb.resource("products/draw-selections-with-maturity", "00430").queryParam("maturityPeriod", "36").get(new GenericType<Map<Long, Collection<DrawSelectionsDTO>>>() {
-        });  // 200  draw sections
-
-        Collection<ProductAvailableDTO> installmentProducts = rb.resource("credit-application/product/availability/INSTALLMENT", "00440").get(new GenericType<Collection<ProductAvailableDTO>>() {
+        Collection<ProductAvailableDTO> installmentProducts = rb.resource("credit-application/product/availability/INSTALLMENT", "00430").get(new GenericType<Collection<ProductAvailableDTO>>() {
         });  // 200   alot of product as a response
-        Collection<ProductAvailableDTO> creditLineProducts = rb.resource("credit-application/product/availability/CREDIT_LINE", "00450").get(new GenericType<Collection<ProductAvailableDTO>>() {
+        Collection<ProductAvailableDTO> creditLineProducts = rb.resource("credit-application/product/availability/CREDIT_LINE", "00440").get(new GenericType<Collection<ProductAvailableDTO>>() {
         });  // 200   alot of product as a response
 
+        Map<Long, Collection<DrawSelectionsDTO>> drawSectionsWithMaturity = rb.resource("products/draw-selections-with-maturity", "00450").queryParam("maturityPeriod", "36").get(new GenericType<Map<Long, Collection<DrawSelectionsDTO>>>() {
+        });  // 200  draw sections
 
+        logToConsole(authenticationInfoDTO);
+        logToConsole(closedContractDTOs);
         logToConsole(creditApplicationDTO);
         logToConsole(installmentProducts);
         logToConsole(creditLineProducts);
-        logToConsole(drawSections);
         logToConsole(drawSectionsWithMaturity);
 
         if (creditLineProducts.size() > 0) {
-            int randomIndex = new Random(System.currentTimeMillis()).nextInt(creditLineProducts.size() - 1);
+            int randomIndex = new Random(System.currentTimeMillis()).nextInt(creditLineProducts.size());
             ProductAvailableDTO[] productAvailableDTOs = creditLineProducts.toArray(new ProductAvailableDTO[creditLineProducts.size()]);
             ProductAvailableDTO productAvailableDTO = productAvailableDTOs[randomIndex];
             String id = productAvailableDTO.id;
@@ -341,77 +379,55 @@ public class Aio extends AbstractLoadGenerator {
         throw new IllegalStateException("Could find product from list");
     }
 
-    private void submitApplication() {
-        // Submitting the application
-        AuthenticationPostOfficeDTO authenticationPostOfficeDTO = new AuthenticationPostOfficeDTO();
-        authenticationPostOfficeDTO.authenticationPostOfficeId = 1L;
-        rb.resource("credit-application/authpostoffice", "00310").put(authenticationPostOfficeDTO);  // 204 no response
+    @Override
+    public void submitApplication() {
 
-        String msisdn = GeneratorUtil.generateMsisd();
-        rb.resource("customer/msisdn", "00320").put(new MsisdnUpdateDTO(msisdn));  // 204 no response
+        LegalDocumentDTO legalDocumentDTO = new LegalDocumentDTO();
+        legalDocumentDTO.refinanceRequest = true;
+        legalDocumentDTO.customerFlowStep = CreditApplicationSteps.CustomerFlowStep.FINANCIAL_DATA.name();
 
-
-        RegistrationDTO registrationDTO = new RegistrationDTO();
-        registrationDTO.email = new EmailUpdateDTO(TestDataBuilder.DEFAULT_EMAIL);
-        registrationDTO.bankAccount = new BankAccountUpdateDTO("EE361010010050120017");
-        registrationDTO.password = new PasswordUpdateDTO(TestDataBuilder.DEFAULT_PASSWORD);
-        registrationDTO.msisdnVerification = new MsisdnVerificationDTO(msisdn, TestDataBuilder.TEST_OTP);
-        AddressDTO addressDTO = new AddressDTO();
-        addressDTO.city = "City";
-        addressDTO.street = "Street 1";
-        addressDTO.postcode = "10000";
-        registrationDTO.address = addressDTO;
-        registrationDTO.communicationSettings = new CommunicationSettingsDTO(CustomerCommunicationSettings.DeliveryMethod.EMAIL, CustomerCommunicationSettings.DeliveryMethod.EMAIL, true, null);
-        registrationDTO.preferredLanguage = CountryCodes.CountryCode.EE.getLocale().getLanguage();
-
-        rb.resource("customer/registration", "00330").put(registrationDTO);  // 204 no response
+        rb.resource("credit-application-lt/update-permissions", "00310").post(ClientResponse.class, legalDocumentDTO);
 
 
-        EstonianFinancialDataDTO estonianFinancialDataDTO = new EstonianFinancialDataDTO();
-        estonianFinancialDataDTO.company = "Company";
-        estonianFinancialDataDTO.debtTypesExperienced = new EstonianFinancialDataDTO.Loan[0];
-        estonianFinancialDataDTO.education = EstonianFinancialDataDTO.Education.UNIVERSITY;
-        estonianFinancialDataDTO.employmentDuration = EstonianFinancialDataDTO.EmploymentDuration.MONTHS_5_12;
-        estonianFinancialDataDTO.householdChildren = 2;
-        estonianFinancialDataDTO.livingCosts = 32300;
-        estonianFinancialDataDTO.netIncome = 354000;
-        estonianFinancialDataDTO.occupation = EstonianFinancialDataDTO.Occupation.FULL_TIME;
-        estonianFinancialDataDTO.occupationType = EstonianFinancialDataDTO.OccupationType.SPECIALIST_OFFICE_WORKER;
-        estonianFinancialDataDTO.residence = EstonianFinancialDataDTO.Residence.DORM;
-        estonianFinancialDataDTO.maritalStatus = EstonianFinancialDataDTO.MaritalStatus.SINGLE;
+        LegalDocumentDTO legalDocumentDTO2 = new LegalDocumentDTO();
+        legalDocumentDTO.refinanceRequest = true;
+        legalDocumentDTO.customerFlowStep = CreditApplicationSteps.CustomerFlowStep.FINANCIAL_DATA.name();
+
+        rb.resource("credit-application-lt/update-permissions", "00320").post(ClientResponse.class, legalDocumentDTO2);
 
 
-//        EstonianFinancialDataDTO estonianFinancialDataDTO = new EstonianFinancialDataDTO();
-//        estonianFinancialDataDTO.maritalStatus = EstonianFinancialDataDTO.MaritalStatus.SINGLE;
-//        estonianFinancialDataDTO.education = EstonianFinancialDataDTO.Education.SECONDARY;
-//        estonianFinancialDataDTO.occupation = EstonianFinancialDataDTO.Occupation.STUDENT;
-//        estonianFinancialDataDTO.netIncome = 2540 - 00;
-//        estonianFinancialDataDTO.livingCosts = 123 - 00;
-//        estonianFinancialDataDTO.residence = EstonianFinancialDataDTO.Residence.WITH_PARENTS;
-//        estonianFinancialDataDTO.householdChildren = 1;
-//        estonianFinancialDataDTO.debtTypesExperienced = new EstonianFinancialDataDTO.Loan[0];
+        LithuanianFinancialDataDTO ltFinancialDto = new LithuanianFinancialDataDTO();
+        ltFinancialDto.company = "Company";
+        ltFinancialDto.education = LithuanianFinancialDataDTO.Education.UNIVERSITY;
+        ltFinancialDto.employmentDuration = LithuanianFinancialDataDTO.EmploymentDuration.FROM_4_TO_12_MONTHS;
+        ltFinancialDto.livingAddress = "second address 2";
+        ltFinancialDto.monthlyObligations = 22200;
+        ltFinancialDto.netIncome = 150000;
+        ltFinancialDto.occupation = LithuanianFinancialDataDTO.Occupation.PART_TIME;
+        ltFinancialDto.receiveRefinance = true;
+        ltFinancialDto.residence = LithuanianFinancialDataDTO.Residence.OWN;
 
+        rb.resource("credit-application/financialdata", "00340").put(ltFinancialDto); // 204 no response
 
-        rb.resource("credit-application/financialdata", "00340").put(estonianFinancialDataDTO); // 204 no response
-
-        domainInformation.setMsisdn(msisdn);
     }
 
-    private void openApplicationForm() {
+    @Override
+    public void openApplicationForm() {
         AuthenticationInfoDTO authenticationInfoDTO = rb.resource("authentication", "00210").get(AuthenticationInfoDTO.class);
-//        ClientResponse response = rb.resource("staticcontent").get(ClientResponse.class);
+        List<ClosedContractDTO> closedContractDTOs = rb.resource("customer-lt/closed-contracts", "00220").get((new GenericType<List<ClosedContractDTO>>() {
+        }));
+
         try {
             CreditApplicationDTO creditApplicationDTO = rb.resource("credit-application", "00220").get(CreditApplicationDTO.class); // 404
         } catch (UniformInterfaceException e) {
-
+            //404
         } catch (ClientHandlerException e) {
             e.printStackTrace();
         }
+
         CreditApplicationDTO creditApplicationPutDTO = rb.resource("credit-application", "00230").put(CreditApplicationDTO.class);
-        Collection<LoanIssuerDTO> loanIssuerDTOs = rb.resource("credit-application/loanissuers", "00240").get(new GenericType<Collection<LoanIssuerDTO>>() {
-        });
-        Collection<PostOfficeDTO> postOfficeDTOs = rb.resource("authentication/ee/postoffices", "00250").get(new GenericType<Collection<PostOfficeDTO>>() {
-        });
+
+
         try {
             rb.resource("credit-application/previous", "00260").get(CreditApplicationDTO.class); // 404
         } catch (UniformInterfaceException e) {
@@ -422,17 +438,16 @@ public class Aio extends AbstractLoadGenerator {
 
         domainInformation.setCustomerId(Long.valueOf(authenticationInfoDTO.customer.id));
 
-//        logToConsole(response);
         logToConsole(authenticationInfoDTO);
+        logToConsole(closedContractDTOs);
         logToConsole(creditApplicationPutDTO);
-        logToConsole(loanIssuerDTOs.toArray());
-        logToConsole(postOfficeDTOs.toArray());
+
     }
 
     private void registrationEEC24() {
         UserRegistrationInitDataDTO userRegistrationInitDataDTO = new UserRegistrationInitDataDTO();
         String ssn = GeneratorUtil.generateIdentifier();
-        String msisdn = GeneratorUtil.generateMsisd();
+        String msisdn = GeneratorUtil.generateEEMsisd();
         userRegistrationInitDataDTO.ssn = ssn;
         userRegistrationInitDataDTO.msisdn = msisdn;
 
@@ -461,38 +476,4 @@ public class Aio extends AbstractLoadGenerator {
 //        logToConsole(response);
     }
 
-    public RequestInformation getRequestInformation() {
-        return requestInformation;
-    }
-}
-
-
-class AioFlow implements Runnable {
-
-    private int sessionId;
-
-    public AioFlow(Integer sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    public void run() {
-        Aio aio = new Aio();
-
-        RequestInformation requestInformation = aio.getRequestInformation();
-
-        requestInformation.setPeriodNumber(0);
-        requestInformation.setSessionId(sessionId);
-
-        aio.registration();
-
-        try {
-            for (int executionNumber = 0; executionNumber < Aio.EXECUTION_COUNT; executionNumber++) {
-                requestInformation.setPeriodNumber(executionNumber);
-                aio.viewSSAndDraw();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 }

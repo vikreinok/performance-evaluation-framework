@@ -15,7 +15,7 @@ public abstract class AbstractLoadGenerator {
     protected static final String MODIFICATION_ID = "0000";
     protected static final int PARALLEL_THREADS = 1;
 
-    protected  RequestInformation requestInformation;
+    protected RequestInformation requestInformation;
     protected RequestBuilder rb = null;
 
     public AbstractLoadGenerator() {
@@ -37,9 +37,9 @@ public abstract class AbstractLoadGenerator {
         );
     }
 
-    protected void start(String modificationId) {
+    protected void start(String modificationId, String applicationName) {
 
-        ThreadPoolExecutor threadPoolExecutor = createThreadPoolExecutor("PetClinic");
+        ThreadPoolExecutor threadPoolExecutor = createThreadPoolExecutor(applicationName);
 
         for (int index = 0; index < getThreadCount(); index++) {
 
@@ -64,8 +64,9 @@ public abstract class AbstractLoadGenerator {
 
     protected abstract Runnable getCustomerFlow(String modificationId, Integer sessionId);
 
-
-
+    public static void logToConsole(Object obj) {
+//        System.out.println(ReflectionToStringBuilder.toString(obj, ToStringStyle.SHORT_PREFIX_STYLE));
+    }
 
     public RequestInformation getRequestInformation() {
         return requestInformation;
