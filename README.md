@@ -5,10 +5,10 @@
 --------------------
 
 # A framework for empirical evaluation of Java application performance #
-### Master’s thesis ###
+### Masterâ€™s thesis ###
 
-######**Author** Viktor Reinok######
-######**Supervisor** Juhan Peep Ernits######
+**Author** Viktor Reinok
+**Supervisor** Juhan Peep Ernits
 --------------------
 
  
