@@ -8,6 +8,7 @@
 ### Master’s thesis ###
 
 **Author** Viktor Reinok
+
 **Supervisor** Juhan Peep Ernits
 --------------------
 
